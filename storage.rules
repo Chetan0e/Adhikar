@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check authentication
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the path
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ==================== USER DOCUMENTS ====================
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== SCHEME DOCUMENTS (Public) ====================
+    match /schemes/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Admin only
+    }
+  }
+}
