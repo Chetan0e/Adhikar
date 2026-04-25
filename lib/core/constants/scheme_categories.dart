@@ -6,6 +6,7 @@ class SchemeCategories {
   static const String women = 'women';
   static const String employment = 'employment';
   static const String disability = 'disability';
+  static const String senior = 'senior';
 
   static const Map<String, String> categoryNames = {
     agriculture: 'Agriculture',
@@ -15,6 +16,7 @@ class SchemeCategories {
     women: 'Women & Child',
     employment: 'Employment',
     disability: 'Disability',
+    senior: 'Senior Citizen',
   };
 
   static const Map<String, String> categoryNamesHindi = {
@@ -25,5 +27,6 @@ class SchemeCategories {
     women: 'महिला एवं बाल',
     employment: 'रोजगार',
     disability: 'दिव्यांग',
+    senior: 'वरिष्ठ नागरिक',
   };
 }

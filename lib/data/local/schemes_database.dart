@@ -1,5 +1,3 @@
-import '../models/scheme.dart';
-
 // Complete scheme database with 50+ schemes for MVP
 class SchemesDatabase {
   static List<Map<String, dynamic>> getAllSchemes() {
@@ -830,7 +828,7 @@ class SchemesDatabase {
         "id": "DI002",
         "name": "Indira Gandhi Old Age Pension",
         "name_hindi": "इंदिरा गांधी राष्ट्रीय वृद्धा पेंशन",
-        "category": "disability",
+        "category": "senior",
         "ministry": "Ministry of Rural Development",
         "description": "Pension for senior citizens belonging to BPL families",
         "benefit_amount": "₹200-500/month",

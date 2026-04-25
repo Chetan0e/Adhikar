@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../../../app/router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/scheme.dart';
-import '../../../../data/models/user_profile.dart';
 import '../../../../core/utils/pdf_generator.dart';
 
 class FormFillScreen extends StatefulWidget {
@@ -210,8 +207,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
                     const SizedBox(height: 16),
                     ..._scheme.requiredDocuments.map((doc) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildDocumentUploadCard(doc),
-                        )).animate().fadeIn(delay: 750.ms, duration: 400.ms),
+                          child: _buildDocumentUploadCard(doc).animate().fadeIn(delay: 750.ms, duration: 400.ms),
+                        )),
 
                     const SizedBox(height: 32),
 
@@ -330,7 +327,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         );
       }).toList(),
       onChanged: (value) {
-        _controllers[key].text = value ?? '';
+        _controllers[key]?.text = value ?? '';
       },
       validator: (value) {
         if (value == null || value.isEmpty) {

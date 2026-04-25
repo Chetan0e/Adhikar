@@ -23,7 +23,7 @@ ThemeData getAppTheme() {
     ),
 
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.card,
       elevation: 2,
       shadowColor: Colors.black12,
@@ -159,7 +159,7 @@ ThemeData getAppTheme() {
     // Chip Theme
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.surface,
-      selectedColor: AppColors.primary.withOpacity(0.1),
+      selectedColor: AppColors.primary.withValues(alpha: 0.12),
       labelStyle: const TextStyle(
         color: AppColors.textPrimary,
         fontFamily: 'Poppins',
@@ -167,7 +167,7 @@ ThemeData getAppTheme() {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: AppColors.border),
+        side: const BorderSide(color: AppColors.border),
       ),
     ),
 

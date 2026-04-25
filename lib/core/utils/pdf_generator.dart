@@ -398,7 +398,7 @@ class PDFGenerator {
                         child: pw.Center(
                           child: pw.Text(
                             '$index',
-                            style: const pw.TextStyle(
+                            style: pw.TextStyle(
                               color: PdfColors.white,
                               fontWeight: pw.FontWeight.bold,
                             ),

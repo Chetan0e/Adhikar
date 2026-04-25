@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -43,28 +44,28 @@ class SchemeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Confidence Card
-            _buildConfidenceCard(confidence, reasons).animate().fadeIn(delay: 200.ms, duration: 400.ms),
+            _buildConfidenceCard(context, confidence, reasons).animate().fadeIn(delay: 200.ms, duration: 400.ms),
 
             const SizedBox(height: 16),
 
             // Description Card
-            _buildInfoCard('Description', scheme.description).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+            _buildInfoCard(context, 'Description', scheme.description).animate().fadeIn(delay: 300.ms, duration: 400.ms),
 
             const SizedBox(height: 16),
 
             // Documents Required Card
-            _buildDocumentsCard(missingDocuments).animate().fadeIn(delay: 400.ms, duration: 400.ms),
+            _buildDocumentsCard(context, missingDocuments).animate().fadeIn(delay: 400.ms, duration: 400.ms),
 
             const SizedBox(height: 16),
 
             // Application Info Card
-            _buildApplicationCard(scheme).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+            _buildApplicationCard(context, scheme).animate().fadeIn(delay: 500.ms, duration: 400.ms),
 
             const SizedBox(height: 100),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context, scheme).animate().slideUp(begin: const Offset(0, 1), duration: 400.ms),
+      bottomNavigationBar: _buildBottomBar(context, scheme).animate().slide(begin: const Offset(0, 1), duration: 400.ms),
     );
   }
 
@@ -142,7 +143,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildConfidenceCard(double confidence, List<String> reasons) {
+  Widget _buildConfidenceCard(BuildContext context, double confidence, List<String> reasons) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -222,7 +223,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(String title, String content) {
+  Widget _buildInfoCard(BuildContext context, String title, String content) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -250,7 +251,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDocumentsCard(List<String> documents) {
+  Widget _buildDocumentsCard(BuildContext context, List<String> documents) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -293,7 +294,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildApplicationCard(Scheme scheme) {
+  Widget _buildApplicationCard(BuildContext context, Scheme scheme) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -312,9 +313,9 @@ class SchemeDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _buildInfoRow('Ministry', scheme.ministry),
+          _buildInfoRow(context, 'Ministry', scheme.ministry),
           const SizedBox(height: 8),
-          _buildInfoRow('Apply At', scheme.applicationOffice),
+          _buildInfoRow(context, 'Apply At', scheme.applicationOffice),
           const SizedBox(height: 16),
           if (scheme.applicationUrl.isNotEmpty)
             OutlinedButton.icon(
@@ -327,7 +328,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,19 +367,41 @@ class SchemeDetailScreen extends StatelessWidget {
         ],
       ),
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Back'),
-              ),
+            // Top row: Share + Documents
+            Row(
+              children: [
+                // Share button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _shareScheme(scheme),
+                    icon: const Icon(Icons.share, size: 16),
+                    label: const Text('Share'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Documents checklist
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.documentChecklist,
+                        arguments: schemeData,
+                      );
+                    },
+                    icon: const Icon(Icons.checklist, size: 16),
+                    label: const Text('Documents'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 2,
+            const SizedBox(height: 12),
+            // Apply button
+            SizedBox(
+              width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(
@@ -394,6 +417,15 @@ class SchemeDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _shareScheme(Scheme scheme) {
+    final text = '${scheme.name}\n'
+        'Benefit: ${scheme.benefitAmount}\n'
+        'Eligibility: ${scheme.eligibility}\n'
+        'Apply at: ${scheme.applicationUrl.isNotEmpty ? scheme.applicationUrl : scheme.applicationOffice}\n\n'
+        'Found using Adhikar app';
+    Share.share(text, subject: scheme.name);
   }
 
   Color _getCategoryColor(String category) {

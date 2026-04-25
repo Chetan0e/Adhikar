@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../data/constants/hive_boxes.dart';
+import '../constants/hive_boxes.dart';
 
 enum SyncTaskType {
   profileUpdate,
@@ -62,7 +62,7 @@ class OfflineQueueService {
 
   /// Initialize the offline queue
   Future<void> init() async {
-    _queueBox = await Hive.openBox(kSyncQueueBox);
+    _queueBox = await Hive.openBox(HiveBoxes.kSyncQueueBox);
   }
 
   /// Add a task to the sync queue

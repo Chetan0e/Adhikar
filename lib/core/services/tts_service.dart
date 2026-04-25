@@ -1,68 +1,70 @@
 import 'package:flutter_tts/flutter_tts.dart';
+import '../constants/supported_languages.dart';
 
-class TTSService {
+/// TtsService — speaks text in the selected language.
+/// Use [speak] for general TTS, [stop] to halt.
+class TtsService {
   final FlutterTts _tts = FlutterTts();
   bool _isInitialized = false;
+  bool _speaking = false;
+  double _speechRate = 0.45;
 
-  /// Initialize text-to-speech
-  Future<bool> init() async {
+  /// Initialize with defaults
+  Future<void> init() async {
     try {
       await _tts.setSharedInstance(true);
-      _isInitialized = true;
-      
-      // Set default settings
-      await _tts.setSpeechRate(0.5);
+      await _tts.setSpeechRate(_speechRate);
       await _tts.setVolume(1.0);
       await _tts.setPitch(1.0);
-      
-      return true;
+
+      _tts.setStartHandler(() => _speaking = true);
+      _tts.setCompletionHandler(() => _speaking = false);
+      _tts.setErrorHandler((_) => _speaking = false);
+
+      _isInitialized = true;
     } catch (e) {
-      print('TTS initialization error: $e');
-      return false;
+      // Graceful failure — silent mode or no TTS engine
+      _isInitialized = false;
     }
   }
 
-  /// Set language for speech
-  Future<void> setLanguage(String languageCode) async {
-    await _tts.setLanguage(languageCode);
-  }
-
-  /// Speak text
-  Future<void> speak(String text) async {
-    if (!_isInitialized) {
-      await init();
+  /// Speak [text] in [languageCode] (e.g. 'hi', 'mr').
+  Future<void> speak(String text, String languageCode) async {
+    if (!_isInitialized) await init();
+    try {
+      final locale = SupportedLanguages.ttsLocales[languageCode] ?? 'hi-IN';
+      await _tts.setLanguage(locale);
+      await _tts.setSpeechRate(_speechRate);
+      await _tts.setPitch(1.0);
+      await _tts.speak(text);
+    } catch (_) {
+      // Silently catch TTS errors (e.g., silent mode)
     }
-    
-    await _tts.speak(text);
   }
 
   /// Stop speaking
   Future<void> stop() async {
-    await _tts.stop();
+    try {
+      await _tts.stop();
+    } catch (_) {}
+    _speaking = false;
   }
 
-  /// Pause speaking
-  Future<void> pause() async {
-    await _tts.pause();
-  }
-
-  /// Set speech rate (0.0 to 1.0)
+  /// Set speech rate (0.0–1.0)
   Future<void> setSpeechRate(double rate) async {
+    _speechRate = rate;
     await _tts.setSpeechRate(rate);
   }
 
-  /// Set pitch (0.5 to 2.0)
-  Future<void> setPitch(double pitch) async {
-    await _tts.setPitch(pitch);
-  }
+  bool get isSpeaking => _speaking;
 
-  /// Set volume (0.0 to 1.0)
-  Future<void> setVolume(double volume) async {
-    await _tts.setVolume(volume);
-  }
-
-  /// Check if currently speaking
-  Future<bool> get isSpeaking async {
-    return await _tts.isSpeaking;
+  /// Check if a language is available for TTS
+  Future<bool> isLanguageAvailable(String languageCode) async {
+    try {
+      final locale = SupportedLanguages.ttsLocales[languageCode] ?? 'hi-IN';
+      return await _tts.isLanguageAvailable(locale) == true;
+    } catch (_) {
+      return false;
+    }
   }
 }

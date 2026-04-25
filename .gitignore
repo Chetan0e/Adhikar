@@ -1,70 +1,112 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
+# ADHIKAR - .gitignore
+
+# ----------------------------------------------------------------------------
+# System Files
+# ----------------------------------------------------------------------------
 .DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+desktop.ini
+ehthumbs.db
+Thumbs.db
+*.log
+*.class
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# VS Code
-.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ----------------------------------------------------------------------------
+# Flutter / Dart
+# ----------------------------------------------------------------------------
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
-/build/
 build/
-*.g.dart
-*.freezed.dart
 
-# Symbolication related
-app.*.symbols
+# ----------------------------------------------------------------------------
+# IDE - VS Code
+# ----------------------------------------------------------------------------
+.vscode/
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 
-# Obfuscation related
-app.*.map.json
-
-# Android Studio
+# ----------------------------------------------------------------------------
+# IDE - IntelliJ / Android Studio
+# ----------------------------------------------------------------------------
+*.iml
+*.ipr
+*.iws
+.idea/
 /android/app/debug
 /android/app/profile
 /android/app/release
 
-# Environment variables & Secrets (CRITICAL)
+# ----------------------------------------------------------------------------
+# Android Related
+# ----------------------------------------------------------------------------
+android/.gradle/
+android/local.properties
+android/captures/
+android/key.properties
+**/android/**/generated/
+*.keystore
+*.jks
+
+# ----------------------------------------------------------------------------
+# iOS Related
+# ----------------------------------------------------------------------------
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_plugins_dependencies.product.bundle
+ios/ServiceDefinitions.json
+ios/Runner/Generated.xcconfig
+*.cert
+*.mobileprovision
+*.p12
+*.pem
+
+# ----------------------------------------------------------------------------
+# Windows Related
+# ----------------------------------------------------------------------------
+windows/flutter/ephemeral/
+windows/flutter/generated_config.cmake
+
+# ----------------------------------------------------------------------------
+# Environment Variables & Secrets (CRITICAL)
+# ----------------------------------------------------------------------------
 .env
 .env.*
 *.env
-key.properties
-**/*.keystore
-**/*.jks
+!.env.example
 
+# ----------------------------------------------------------------------------
 # Firebase
+# ----------------------------------------------------------------------------
+# Note: google-services.json is excluded to prevent leaking credentials.
+# Users should add their own.
 google-services.json
 GoogleService-Info.plist
 firebase-debug.log*
-firebase-debug.log
 .firebase/
 
-# iOS related
-**/ios/Pods/
-**/ios/.symlinks/
-**/ios/**/*.cert
-**/ios/**/*.mobileprovision
-**/ios/**/*.p12
-**/ios/**/*.pem
+# ----------------------------------------------------------------------------
+# Generated Code (Build Runner)
+# ----------------------------------------------------------------------------
+# Standard practice for apps is to ignore generated files if they can be rebuilt.
+*.g.dart
+*.freezed.dart
 
-files/
+# ----------------------------------------------------------------------------
+# Miscellaneous
+# ----------------------------------------------------------------------------
+app.*.symbols
+app.*.map.json
+/files/
+/tmp/

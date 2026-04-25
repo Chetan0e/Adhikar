@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/router.dart';
+import '../../../../core/blocs/language/language_cubit.dart';
+import '../../../../core/constants/supported_languages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/user_profile.dart';
 import '../../../../data/remote/gemini_service.dart';
-import '../../../../data/local/schemes_database.dart';
-import '../../../../core/utils/eligibility_engine.dart';
 
 class ProfileReviewScreen extends StatefulWidget {
   const ProfileReviewScreen({super.key});
@@ -17,12 +17,12 @@ class ProfileReviewScreen extends StatefulWidget {
 
 class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
   final GeminiService _geminiService = GeminiService();
-  final EligibilityEngine _eligibilityEngine = EligibilityEngine();
-  
+
   UserProfile? _profile;
   bool _isLoading = true;
   bool _isEditing = false;
   String _transcript = '';
+  String? _aiError;
 
   // Controllers for editing
   late TextEditingController _nameController;
@@ -31,12 +31,13 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
   late TextEditingController _occupationController;
   late TextEditingController _stateController;
   late TextEditingController _districtController;
+  late TextEditingController _castController;
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProfile());
   }
 
   void _initializeControllers() {
@@ -46,150 +47,7 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
     _occupationController = TextEditingController();
     _stateController = TextEditingController();
     _districtController = TextEditingController();
-  }
-
-  Future<void> _loadProfile() async {
-    final args = ModalRoute.of(context)!.settings.arguments as Map?;
-    if (args != null) {
-      _transcript = args['transcript'] ?? '';
-      
-      // Try to extract profile using Gemini
-      if (_transcript.isNotEmpty) {
-        // API key is now handled internally by GeminiService or via dart-define
-        // _geminiService.setApiKey(const String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'YOUR_API_KEY'));
-        
-        try {
-          final extractedData = await _geminiService.extractProfile(_transcript);
-          _profile = UserProfile.fromJson(extractedData);
-        } catch (e) {
-          // Fallback to offline extraction if Gemini fails
-          final extractedData = await _extractProfileOffline(_transcript);
-          _profile = UserProfile.fromJson(extractedData);
-        }
-      } else {
-        // Create empty profile
-        _profile = UserProfile(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: '',
-          age: 0,
-          gender: '',
-          state: '',
-          district: '',
-          caste: '',
-          occupation: '',
-          annualIncome: 0,
-          landHolding: 0,
-          isDisabled: false,
-          isWidow: false,
-          hasBPLCard: false,
-          hasAadhar: false,
-          hasBankAccount: false,
-          familySize: 0,
-          childrenAges: [],
-          isPregnant: false,
-          educationLevel: '',
-          createdAt: DateTime.now(),
-        );
-      }
-      
-      _populateControllers();
-      
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<Map<String, dynamic>> _extractProfileOffline(String text) async {
-    // Simple keyword-based extraction as fallback
-    final result = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'name': '',
-      'age': 0,
-      'gender': '',
-      'state': '',
-      'district': '',
-      'caste': '',
-      'occupation': '',
-      'annual_income': 0,
-      'land_holding': 0,
-      'is_disabled': false,
-      'is_widow': false,
-      'has_bpl_card': false,
-      'has_aadhar': false,
-      'has_bank_account': false,
-      'family_size': 0,
-      'children_ages': <int>[],
-      'is_pregnant': false,
-      'education_level': '',
-      'created_at': DateTime.now().toIso8601String(),
-      'confidence': 0.5,
-      'missing_info': ['Could not extract automatically'],
-    };
-
-    // Simple extraction logic
-    final lowerText = text.toLowerCase();
-    
-    if (lowerText.contains('farmer') || lowerText.contains('kisan')) {
-      result['occupation'] = 'farmer';
-      result['annual_income'] = 60000;
-    }
-    
-    if (lowerText.contains('widow') || lowerText.contains('vidhwa')) {
-      result['is_widow'] = true;
-      result['gender'] = 'female';
-    }
-    
-    if (lowerText.contains('bpl')) {
-      result['has_bpl_card'] = true;
-    }
-    
-    if (lowerText.contains('aadhar')) {
-      result['has_aadhar'] = true;
-    }
-
-    return result;
-  }
-
-  void _populateControllers() {
-    if (_profile == null) return;
-    
-    _nameController.text = _profile!.name;
-    _ageController.text = _profile!.age.toString();
-    _incomeController.text = _profile!.annualIncome.toString();
-    _occupationController.text = _profile!.occupation;
-    _stateController.text = _profile!.state;
-    _districtController.text = _profile!.district;
-  }
-
-  void _saveProfile() {
-    if (_profile == null) return;
-
-    final updatedProfile = _profile!.copyWith(
-      name: _nameController.text,
-      age: int.tryParse(_ageController.text) ?? 0,
-      annualIncome: double.tryParse(_incomeController.text) ?? 0,
-      occupation: _occupationController.text,
-      state: _stateController.text,
-      district: _districtController.text,
-    );
-
-    setState(() {
-      _profile = updatedProfile;
-      _isEditing = false;
-    });
-  }
-
-  void _handleContinue() {
-    if (_profile == null) return;
-    
-    Navigator.pushNamed(
-      context,
-      AppRouter.schemes,
-      arguments: _profile!.toJson(),
-    );
+    _castController = TextEditingController();
   }
 
   @override
@@ -200,7 +58,132 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
     _occupationController.dispose();
     _stateController.dispose();
     _districtController.dispose();
+    _castController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    if (args == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    _transcript = args['transcript'] as String? ?? '';
+
+    if (_transcript.isNotEmpty) {
+      // Build language-aware Gemini prompt
+      final langCode = context.read<LanguageCubit>().currentLanguageCode;
+      final langInstruction = SupportedLanguages.geminiLanguageInstruction(langCode);
+
+      try {
+        final extractedData =
+            await _geminiService.extractProfile(_transcript, languageHint: langInstruction);
+        if (mounted) {
+          _profile = UserProfile.fromJson(extractedData);
+        }
+      } catch (e) {
+        if (mounted) {
+          _aiError = 'Could not auto-extract. Please fill manually.';
+          _profile = _buildEmptyProfile();
+        }
+      }
+    } else {
+      _profile = _buildEmptyProfile();
+    }
+
+    _populateControllers();
+
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  UserProfile _buildEmptyProfile() {
+    return UserProfile(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: '',
+      age: 0,
+      gender: '',
+      state: '',
+      district: '',
+      caste: '',
+      occupation: '',
+      annualIncome: 0,
+      landHolding: 0,
+      isDisabled: false,
+      isWidow: false,
+      hasBPLCard: false,
+      hasAadhar: false,
+      hasBankAccount: false,
+      familySize: 1,
+      childrenAges: [],
+      isPregnant: false,
+      educationLevel: '',
+      createdAt: DateTime.now(),
+    );
+  }
+
+  void _populateControllers() {
+    if (_profile == null) return;
+    _nameController.text = _profile!.name;
+    _ageController.text = _profile!.age > 0 ? _profile!.age.toString() : '';
+    _incomeController.text =
+        _profile!.annualIncome > 0 ? _profile!.annualIncome.toString() : '';
+    _occupationController.text = _profile!.occupation;
+    _stateController.text = _profile!.state;
+    _districtController.text = _profile!.district;
+    _castController.text = _profile!.caste;
+  }
+
+  void _saveProfile() {
+    if (_profile == null) return;
+    setState(() {
+      _profile = _profile!.copyWith(
+        name: _nameController.text.trim(),
+        age: int.tryParse(_ageController.text) ?? _profile!.age,
+        annualIncome:
+            double.tryParse(_incomeController.text) ?? _profile!.annualIncome,
+        occupation: _occupationController.text.trim(),
+        state: _stateController.text.trim(),
+        district: _districtController.text.trim(),
+        caste: _castController.text.trim(),
+      );
+      _isEditing = false;
+    });
+  }
+
+  void _handleContinue() {
+    if (_profile == null) return;
+    Navigator.pushNamed(
+      context,
+      AppRouter.schemes,
+      arguments: _profile!.toJson(),
+    );
+  }
+
+  void _toggleBool(String field) {
+    if (_profile == null) return;
+    setState(() {
+      switch (field) {
+        case 'bpl':
+          _profile = _profile!.copyWith(hasBPLCard: !_profile!.hasBPLCard);
+          break;
+        case 'aadhar':
+          _profile = _profile!.copyWith(hasAadhar: !_profile!.hasAadhar);
+          break;
+        case 'bank':
+          _profile = _profile!.copyWith(hasBankAccount: !_profile!.hasBankAccount);
+          break;
+        case 'widow':
+          _profile = _profile!.copyWith(isWidow: !_profile!.isWidow);
+          break;
+        case 'disabled':
+          _profile = _profile!.copyWith(isDisabled: !_profile!.isDisabled);
+          break;
+        case 'pregnant':
+          _profile = _profile!.copyWith(isPregnant: !_profile!.isPregnant);
+          break;
+      }
+    });
   }
 
   @override
@@ -212,84 +195,120 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
         elevation: 0,
         actions: [
           if (!_isLoading && _profile != null)
-            IconButton(
-              icon: Icon(_isEditing ? Icons.check : Icons.edit),
+            TextButton.icon(
               onPressed: () {
                 if (_isEditing) {
                   _saveProfile();
                 } else {
-                  setState(() {
-                    _isEditing = true;
-                  });
+                  setState(() => _isEditing = true);
                 }
               },
+              icon: Icon(_isEditing ? Icons.check : Icons.edit, size: 18),
+              label: Text(_isEditing ? 'Save' : 'Edit'),
             ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildLoadingState()
           : _profile == null
-              ? const Center(child: Text('No profile data'))
+              ? const Center(child: Text('No profile data. Go back and try again.'))
               : SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 0, 16, 100),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header
-                        Text(
-                          'Review Your Profile',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ).animate().fadeIn(duration: 400.ms),
-
                         const SizedBox(height: 8),
 
-                        Text(
-                          'Please verify and edit the information below',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+                        // AI extraction notice / error
+                        if (_aiError != null)
+                          _buildWarningBanner(_aiError!)
+                        else if (_transcript.isNotEmpty)
+                          _buildAISuccessBanner(),
+
+                        const SizedBox(height: 16),
+
+                        // Transcript preview (collapsible)
+                        if (_transcript.isNotEmpty) _buildTranscriptCard(),
+
+                        const SizedBox(height: 16),
+
+                        // Personal Info
+                        _buildSection(
+                          title: '👤  Personal Information',
+                          delay: 200,
+                          children: [
+                            _buildEditableField('Name', _nameController, 'full name'),
+                            _buildEditableField('Age', _ageController, 'years',
+                                keyboardType: TextInputType.number),
+                            _buildReadOnlyRow('Gender',
+                                _profile!.gender.isEmpty ? 'Not detected' : _profile!.gender),
+                            _buildEditableField('State', _stateController, 'e.g. Maharashtra'),
+                            _buildEditableField('District', _districtController, 'e.g. Pune'),
+                            _buildEditableField('Caste', _castController, 'e.g. OBC / SC / ST'),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Economic Info
+                        _buildSection(
+                          title: '💰  Economic Information',
+                          delay: 300,
+                          children: [
+                            _buildEditableField('Occupation', _occupationController,
+                                'e.g. farmer, labourer'),
+                            _buildEditableField('Annual Income (₹)', _incomeController,
+                                '0', keyboardType: TextInputType.number),
+                            _buildReadOnlyRow('Land Holding',
+                                '${_profile!.landHolding} acres'),
+                            _buildReadOnlyRow('Family Size',
+                                '${_profile!.familySize} members'),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Social Status (toggleable chips)
+                        _buildSection(
+                          title: '🏷️  Social Status',
+                          delay: 400,
+                          children: [
+                            _buildToggleGrid(),
+                          ],
+                        ),
 
                         const SizedBox(height: 24),
 
-                        // Profile Cards
-                        _buildProfileCard('Personal Information', [
-                          _buildField('Name', _nameController, 'name'),
-                          _buildField('Age', _ageController, 'age', keyboardType: TextInputType.number),
-                          _buildField('Gender', _profile!.gender, 'gender', isEditable: false),
-                          _buildField('State', _stateController, 'state'),
-                          _buildField('District', _districtController, 'district'),
-                        ], delay: 200),
-
-                        const SizedBox(height: 16),
-
-                        _buildProfileCard('Economic Information', [
-                          _buildField('Occupation', _occupationController, 'occupation'),
-                          _buildField('Annual Income (₹)', _incomeController, 'income', keyboardType: TextInputType.number),
-                          _buildField('Land Holding (acres)', _profile!.landHolding.toString(), 'land', isEditable: false),
-                        ], delay: 300),
-
-                        const SizedBox(height: 16),
-
-                        _buildProfileCard('Social Information', [
-                          _buildBooleanField('Has BPL Card', _profile!.hasBPLCard),
-                          _buildBooleanField('Has Aadhar Card', _profile!.hasAadhar),
-                          _buildBooleanField('Has Bank Account', _profile!.hasBankAccount),
-                          _buildBooleanField('Is Widow', _profile!.isWidow),
-                          _buildBooleanField('Is Disabled', _profile!.isDisabled),
-                        ], delay: 400),
-
-                        const SizedBox(height: 32),
-
-                        // Continue Button
+                        // Continue CTA
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
+                          child: ElevatedButton.icon(
                             onPressed: _handleContinue,
-                            child: const Text('Find Eligible Schemes'),
+                            icon: const Icon(Icons.search),
+                            label: const Text('Find Eligible Schemes'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
                           ),
                         ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+
+                        const SizedBox(height: 12),
+
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              setState(() => _isEditing = true);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Edit your profile and tap Save'),
+                                ),
+                              );
+                            },
+                            child: const Text('Something wrong? Edit profile'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -297,9 +316,136 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
     );
   }
 
-  Widget _buildProfileCard(String title, List<Widget> children, {int delay = 0}) {
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 20),
+          Text(
+            'AI is analyzing your response…',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'This takes a few seconds',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textTertiary,
+            ),
+          ),
+        ],
+      ).animate().fadeIn(duration: 400.ms),
+    );
+  }
+
+  Widget _buildAISuccessBanner() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.accentGreen.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.auto_awesome, color: AppColors.accentGreen, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'AI successfully extracted your profile. Please verify and correct any errors.',
+              style: TextStyle(
+                color: AppColors.accentGreen,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms);
+  }
+
+  Widget _buildWarningBanner(String message) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber, color: AppColors.warning, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: AppColors.warning, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTranscriptCard() {
+    bool expanded = false;
+    return StatefulBuilder(
+      builder: (context, setLocal) => GestureDetector(
+        onTap: () => setLocal(() => expanded = !expanded),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.mic, size: 16, color: AppColors.primary),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Your voice input',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    expanded ? Icons.expand_less : Icons.expand_more,
+                    size: 18,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+              if (expanded) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _transcript,
+                  style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+    int delay = 0,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
@@ -310,88 +456,125 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppColors.primary,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.3,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           ...children,
         ],
       ),
     ).animate().fadeIn(delay: Duration(milliseconds: delay), duration: 400.ms);
   }
 
-  Widget _buildField(String label, dynamic value, String key, {bool isEditable = true, TextInputType? keyboardType}) {
-    if (value is TextEditingController) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: TextField(
-          controller: value,
-          enabled: _isEditing && isEditable,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            labelText: label,
-            border: _isEditing ? null : InputBorder.none,
-            enabledBorder: _isEditing ? null : InputBorder.none,
-          ),
-        ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            Text(
-              value.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  Widget _buildBooleanField(String label, bool value) {
+  Widget _buildEditableField(
+    String label,
+    TextEditingController controller,
+    String hint, {
+    TextInputType? keyboardType,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
+      child: _isEditing
+          ? TextField(
+              controller: controller,
+              keyboardType: keyboardType,
+              decoration: InputDecoration(
+                labelText: label,
+                hintText: hint,
+                border: const OutlineInputBorder(),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            )
+          : _buildReadOnlyRow(
+              label,
+              controller.text.isEmpty ? '—' : controller.text,
+            ),
+    );
+  }
+
+  Widget _buildReadOnlyRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 13,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: value ? AppColors.accentGreen.withOpacity(0.1) : AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: value ? AppColors.accentGreen : AppColors.border,
-              ),
-            ),
-            child: Text(
-              value ? 'Yes' : 'No',
-              style: TextStyle(
-                color: value ? AppColors.accentGreen : AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildToggleGrid() {
+    final toggles = [
+      {'label': 'BPL Card', 'field': 'bpl', 'value': _profile!.hasBPLCard},
+      {'label': 'Aadhaar', 'field': 'aadhar', 'value': _profile!.hasAadhar},
+      {'label': 'Bank Account', 'field': 'bank', 'value': _profile!.hasBankAccount},
+      {'label': 'Widow', 'field': 'widow', 'value': _profile!.isWidow},
+      {'label': 'Disabled', 'field': 'disabled', 'value': _profile!.isDisabled},
+      {'label': 'Pregnant', 'field': 'pregnant', 'value': _profile!.isPregnant},
+    ];
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: toggles.map((t) {
+        final isYes = t['value'] as bool;
+        return GestureDetector(
+          onTap: () => _toggleBool(t['field'] as String),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isYes
+                  ? AppColors.primary.withValues(alpha: 0.1)
+                  : AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isYes ? AppColors.primary : AppColors.border,
+                width: isYes ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isYes ? Icons.check_circle : Icons.circle_outlined,
+                  size: 14,
+                  color: isYes ? AppColors.primary : AppColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  t['label'] as String,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isYes ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

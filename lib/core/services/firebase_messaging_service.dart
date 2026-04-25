@@ -1,23 +1,20 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart';
+
+// Note: flutter_local_notifications is not currently in pubspec.yaml.
+// Until added, local notification display is disabled. FCM token and
+// background message handling still works.
 
 class FirebaseMessagingService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   /// Initialize Firebase Messaging
   Future<void> initialize() async {
-    // Request permission
     await _requestPermission();
 
-    // Get FCM token
     final token = await _messaging.getToken();
-    print('FCM Token: $token');
+    debugPrint('FCM Token: $token');
 
-    // Configure local notifications
-    await _configureLocalNotifications();
-
-    // Handle incoming messages
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessageOpened);
   }
@@ -26,61 +23,22 @@ class FirebaseMessagingService {
   Future<void> _requestPermission() async {
     final settings = await _messaging.requestPermission(
       alert: true,
-      announcement: false,
       badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
       sound: true,
     );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('Notification permission granted');
-    } else {
-      print('Notification permission denied');
-    }
+    debugPrint('Notification permission: ${settings.authorizationStatus}');
   }
 
-  /// Configure local notifications
-  Future<void> _configureLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
-
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-
-    await _localNotifications.initialize(initSettings);
-  }
-
-  /// Handle foreground messages
+  /// Handle foreground messages (local notification display disabled until
+  /// flutter_local_notifications is added to pubspec.yaml)
   void _handleForegroundMessage(RemoteMessage message) {
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
-
-    if (notification != null && android != null) {
-      _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            'adhikar_channel',
-            'Adhikar Notifications',
-            channelDescription: 'Notifications for scheme updates',
-            importance: Importance.max,
-            priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
-          ),
-        ),
-      );
-    }
+    debugPrint('Foreground message: ${message.notification?.title}');
+    // TODO: Show local notification using flutter_local_notifications
   }
 
   /// Handle background message opened
   void _handleBackgroundMessageOpened(RemoteMessage message) {
-    print('Background message opened: ${message.messageId}');
+    debugPrint('Background message opened: ${message.messageId}');
   }
 
   /// Subscribe to topic

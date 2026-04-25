@@ -5,15 +5,19 @@ class ConnectivityService {
 
   /// Check if device is currently online
   Future<bool> isOnline() async {
-    final result = await _connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    final results = await _connectivity.checkConnectivity();
+    return results.any((r) => r != ConnectivityResult.none);
   }
 
-  /// Stream connectivity changes
-  Stream<ConnectivityResult> get onConnectivityChanged =>
-      _connectivity.onConnectivityChanged;
+  /// Stream connectivity changes — emits true when online, false when offline
+  Stream<bool> get onConnectivityChanged =>
+      _connectivity.onConnectivityChanged.map(
+        (results) => results.any((r) => r != ConnectivityResult.none),
+      );
 
-  /// Get current connectivity result
-  Future<ConnectivityResult> get connectivityResult async =>
-      await _connectivity.checkConnectivity();
+  /// Get current primary connectivity result
+  Future<ConnectivityResult> get connectivityResult async {
+    final results = await _connectivity.checkConnectivity();
+    return results.firstOrNull ?? ConnectivityResult.none;
+  }
 }

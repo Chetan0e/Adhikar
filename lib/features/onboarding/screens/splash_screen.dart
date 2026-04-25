@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/router.dart';
+import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,13 +16,25 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToLanguage();
+    _navigateAfterSplash();
   }
 
-  void _navigateToLanguage() async {
+  Future<void> _navigateAfterSplash() async {
     await Future.delayed(const Duration(seconds: 3));
-    if (mounted) {
+    if (!mounted) return;
+
+    final cubit = context.read<LanguageCubit>();
+
+    // Smart routing logic:
+    // 1. No language chosen yet → Language selection screen
+    // 2. Language chosen, onboarding NOT complete → Onboarding
+    // 3. Language chosen, onboarding complete → Voice/Home screen
+    if (!cubit.hasChosenLanguage) {
       Navigator.pushReplacementNamed(context, AppRouter.language);
+    } else if (!cubit.isOnboardingComplete) {
+      Navigator.pushReplacementNamed(context, AppRouter.onboarding);
+    } else {
+      Navigator.pushReplacementNamed(context, AppRouter.home);
     }
   }
 
@@ -57,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 32),
 
             // App Name
-            Text(
+            const Text(
               'ADHIKAR',
               style: TextStyle(
                 fontSize: 36,
@@ -92,10 +106,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     color: AppColors.accentWhite.withOpacity(0.8),
                   ),
                 ),
-                const Text(
-                  '🇮🇳',
-                  style: TextStyle(fontSize: 18),
-                ),
+                const Text('🇮🇳', style: TextStyle(fontSize: 18)),
                 Text(
                   ' Bharat',
                   style: TextStyle(
@@ -115,7 +126,8 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 40,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentWhite),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(AppColors.accentWhite),
               ),
             ).animate().fadeIn(delay: 800.ms, duration: 400.ms),
           ],

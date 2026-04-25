@@ -36,4 +36,20 @@ class AppColors {
   static const women = Color(0xFFEC4899);
   static const employment = Color(0xFF8B5CF6);
   static const disability = Color(0xFF6B7280);
+  static const senior = Color(0xFF64748B);
+
+  // Helper: get category color by key
+  static Color forCategory(String category) {
+    switch (category) {
+      case 'agriculture': return agriculture;
+      case 'health': return health;
+      case 'education': return education;
+      case 'housing': return housing;
+      case 'women': return women;
+      case 'employment': return employment;
+      case 'disability': return disability;
+      case 'senior': return senior;
+      default: return primary;
+    }
+  }
 }
