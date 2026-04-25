@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Adhikar Banner](https://img.shields.io/badge/Adhikar-v1.0.0-blue?style=for-the-badge&logo=flutter)
+![Adhikar Banner](https://img.shields.io/badge/Adhikar-v2.0.0-blue?style=for-the-badge&logo=flutter)
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?style=flat-square&logo=flutter)](https://flutter.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Latest-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com)
 [![Gemini AI](https://img.shields.io/badge/Gemini_1.5_Flash-AI_Powered-4285F4?style=flat-square&logo=google)](https://makersuite.google.com)
