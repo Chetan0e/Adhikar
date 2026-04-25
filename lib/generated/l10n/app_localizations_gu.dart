@@ -18,7 +18,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get builtForBharat => 'ભારત માટે 🇮🇳';
 
   @override
-  String get poweredByAI => 'Powered by AI for Bharat';
+  String get poweredByAI => 'AI દ્વારા સંચાલિત, ભારત માટે';
 
   @override
   String get selectLanguage => 'ભાષા પસંદ કરો';

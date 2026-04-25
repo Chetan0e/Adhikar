@@ -18,7 +18,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get builtForBharat => 'ಭಾರತಕ್ಕಾಗಿ ನಿರ್ಮಿಸಲಾಗಿದೆ 🇮🇳';
 
   @override
-  String get poweredByAI => 'Powered by AI for Bharat';
+  String get poweredByAI => 'AI ಮೂಲಕ ಚಾಲಿತ, ಭಾರತಕ್ಕಾಗಿ';
 
   @override
   String get selectLanguage => 'ಭಾಷೆ ಆಯ್ಕೆ ಮಾಡಿ';

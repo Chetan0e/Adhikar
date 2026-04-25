@@ -15,10 +15,10 @@ class AppLocalizationsMl extends AppLocalizations {
   String get tagline => 'നിങ്ങളുടെ അവകാശം. നിങ്ങളുടെ വാതിലിൽ.';
 
   @override
-  String get builtForBharat => 'ഭാരതത്തിനായി 🇮🇳';
+  String get builtForBharat => 'ഭാരതത്തിനായി നിർമ്മിച്ചത് 🇮🇳';
 
   @override
-  String get poweredByAI => 'Powered by AI for Bharat';
+  String get poweredByAI => 'ഭാരതത്തിനായി AI ഉപയോഗിച്ച് പ്രവർത്തിക്കുന്നു';
 
   @override
   String get selectLanguage => 'ഭാഷ തിരഞ്ഞെടുക്കുക';

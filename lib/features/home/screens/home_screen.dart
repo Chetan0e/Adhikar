@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../voice_intake/screens/voice_capture_screen.dart';
 import '../../schemes/screens/scheme_list_screen.dart';
 import '../../ai_chat/screens/ai_chat_screen.dart';
@@ -100,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Container(
                                 width: 8,
                                 height: 8,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: AppColors.secondary,
                                   shape: BoxShape.circle,
                                 ),

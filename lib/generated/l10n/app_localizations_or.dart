@@ -15,13 +15,13 @@ class AppLocalizationsOr extends AppLocalizations {
   String get tagline => 'ଆପଣଙ୍କ ଅଧିକାର। ଆପଣଙ୍କ ଦ୍ୱାରରେ।';
 
   @override
-  String get builtForBharat => 'ଭାରତ ପାଇଁ 🇮🇳';
+  String get builtForBharat => 'ଭାରତ ପାଇଁ ନିର୍ମିତ 🇮🇳';
 
   @override
-  String get poweredByAI => 'Powered by AI for Bharat';
+  String get poweredByAI => 'ଭାରତ ପାଇଁ AI ଦ୍ୱାରା ଚାଳିତ';
 
   @override
-  String get selectLanguage => 'ଭାଷା ବାଛନ୍ତୁ';
+  String get selectLanguage => 'ଭାଷା ଚୟନ କରନ୍ତୁ';
 
   @override
   String get chooseLanguage => 'ଆପଣଙ୍କ ଭାଷା ବାଛନ୍ତୁ';

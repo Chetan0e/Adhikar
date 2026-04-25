@@ -18,7 +18,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get builtForBharat => 'ਭਾਰਤ ਲਈ 🇮🇳';
 
   @override
-  String get poweredByAI => 'Powered by AI for Bharat';
+  String get poweredByAI => 'ਭਾਰਤ ਲਈ AI ਦੁਆਰਾ ਸੰਚਾਲਿਤ';
 
   @override
   String get selectLanguage => 'ਭਾਸ਼ਾ ਚੁਣੋ';
