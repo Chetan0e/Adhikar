@@ -1,21 +1,22 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../core/constants/api_endpoints.dart';
+import '../../core/services/connectivity_service.dart';
 
 class GeminiService {
   final Dio _dio = Dio();
+  final ConnectivityService _connectivityService;
 
-  String apiKey = const String.fromEnvironment(
-    'GEMINI_API_KEY',
-    defaultValue: '',
-  );
+  String apiKey = dotenv.env['GEMINI_API_KEY'] ?? 
+                  const String.fromEnvironment(
+                    'GEMINI_API_KEY',
+                    defaultValue: '',
+                  );
 
-  GeminiService() {
-    _dio.options
-      ..connectTimeout = const Duration(seconds: 30)
-      ..receiveTimeout = const Duration(seconds: 30);
-  }
+  GeminiService({ConnectivityService? connectivityService})
+      : _connectivityService = connectivityService ?? ConnectivityService();
 
   void setApiKey(String key) => apiKey = key;
 
@@ -26,49 +27,63 @@ class GeminiService {
     String text, {
     String languageHint = '',
   }) async {
+    print('[GeminiService] extractProfile called with text: "${text.substring(0, text.length > 50 ? 50 : text.length)}..."');
+    
+    // Guard: empty transcript
+    if (text.trim().length < 5) {
+      print('[GeminiService] WARN: Transcript too short: "$text"');
+      return _extractOffline(text)..['_is_fallback'] = true;
+    }
+
+    // Guard: no API key
     if (apiKey.isEmpty) {
-      debugPrint('[GeminiService] No API key — using offline extraction');
-      return _extractOffline(text);
+      print('[GeminiService] ERROR: GEMINI_API_KEY is empty! Run with --dart-define=GEMINI_API_KEY=your_key');
+      return _extractOffline(text)..['_is_fallback'] = true;
+    }
+
+    // Check actual internet connectivity
+    final hasInternet = await _connectivityService.hasInternet();
+    if (!hasInternet) {
+      print('[GeminiService] No internet connection — using offline extraction');
+      return _extractOffline(text)..['_is_fallback'] = true;
     }
 
     final langNote = languageHint.isNotEmpty
         ? '\n$languageHint'
         : '';
 
-    final prompt = '''You are a government welfare eligibility assistant for India.$langNote
-Extract structured profile information from the user\'s voice description.
-Return ONLY valid JSON. No explanation, no markdown, no code blocks.
+    final prompt = '''Extract information from this text spoken by an Indian citizen.
+Text may be in Hindi, Marathi, Tamil, Telugu, Kannada, or other Indian language.
+Return ONLY a valid JSON object with no explanation and no markdown.
 
-User\'s description:
-$text
+Text: "$text"
 
-Expected JSON format:
+Return exactly this JSON (null for unknown values):
 {
-  "name": "full name or empty string",
-  "age": age in years as integer,
-  "gender": "male/female/other or empty",
-  "state": "state name or empty",
-  "district": "district name or empty",
-  "caste": "general/obc/sc/st or empty",
-  "occupation": "farmer/daily_wage/unemployed/teacher/etc or empty",
-  "annual_income": annual income in rupees as integer,
-  "land_holding": land in acres as number,
-  "is_disabled": true or false,
-  "is_widow": true or false,
-  "has_bpl_card": true or false,
-  "has_aadhar": true or false,
-  "has_bank_account": true or false,
-  "family_size": number of family members as integer,
+  "name": null,
+  "age": null,
+  "gender": null,
+  "state": null,
+  "district": null,
+  "caste": null,
+  "occupation": null,
+  "annual_income": null,
+  "land_holding_acres": null,
+  "is_disabled": false,
+  "is_widow": false,
+  "has_bpl_card": null,
+  "has_aadhar": null,
+  "has_bank_account": null,
+  "family_size": null,
   "children_ages": [],
-  "is_pregnant": true or false,
-  "education_level": "illiterate/primary/secondary/graduate or empty",
+  "is_pregnant": false,
+  "education_level": null,
   "confidence": 0.0 to 1.0,
-  "missing_info": ["list of info that could not be extracted"]
-}
-
-Use null or empty/0 for fields you cannot determine.''';
+  "missing_info": []
+}''';
 
     try {
+      print('[GeminiService] Calling Gemini API...');
       final url =
           '${ApiEndpoints.geminiBaseUrl}/models/${ApiEndpoints.geminiModel}:generateContent?key=$apiKey';
       final response = await _dio.post(url, data: {
@@ -80,24 +95,33 @@ Use null or empty/0 for fields you cannot determine.''';
           }
         ],
         'generationConfig': {
-          'temperature': 0.1,
-          'maxOutputTokens': 1024,
+          'temperature': 0.0,
+          'maxOutputTokens': 512,
         }
-      });
+      }).timeout(const Duration(seconds: 20));
+
+      print('[GeminiService] HTTP status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final rawText =
             response.data['candidates'][0]['content']['parts'][0]['text'] as String;
-        return _parseJson(rawText);
+        print('[GeminiService] Raw response: $rawText');
+        
+        final profile = _parseJson(rawText);
+        print('[GeminiService] Parsed profile: $profile');
+        debugPrint('[GeminiService] Profile extracted successfully');
+        return profile;
       } else {
-        throw Exception('Gemini API error: ${response.statusCode}');
+        print('[GeminiService] API error: ${response.statusCode}');
+        print('[GeminiService] Error body: ${response.data}');
+        return _extractOffline(text)..['_is_fallback'] = true;
       }
     } on DioException catch (e) {
-      debugPrint('[GeminiService] Network error: ${e.message}');
-      return _extractOffline(text);
+      print('[GeminiService] Network error: ${e.message}');
+      return _extractOffline(text)..['_is_fallback'] = true;
     } catch (e) {
-      debugPrint('[GeminiService] Extraction error: $e');
-      return _extractOffline(text);
+      print('[GeminiService] Extraction error: $e');
+      return _extractOffline(text)..['_is_fallback'] = true;
     }
   }
 
@@ -161,6 +185,12 @@ Expected JSON array:
       return 'AI chat is not available offline. Please check your internet connection.';
     }
 
+    // Check actual internet connectivity
+    final hasInternet = await _connectivityService.hasInternet();
+    if (!hasInternet) {
+      return 'AI chat is not available offline. Please check your internet connection.';
+    }
+
     const langInstructions = {
       'hi': 'Respond strictly in Hindi (Devanagari script).',
       'mr': 'Respond strictly in Marathi (Devanagari script).',
@@ -203,6 +233,9 @@ User: $userMessage''';
         return response.data['candidates'][0]['content']['parts'][0]['text']
             as String;
       }
+    } on DioException catch (e) {
+      debugPrint('[GeminiService] Chat network error: ${e.message}');
+      return 'AI chat is not available offline. Please check your internet connection.';
     } catch (e) {
       debugPrint('[GeminiService] Chat error: $e');
     }
@@ -215,11 +248,33 @@ User: $userMessage''';
 
   Map<String, dynamic> _parseJson(String text) {
     try {
+      // Remove markdown code blocks if present
       text = text.replaceAll('```json', '').replaceAll('```', '').trim();
+      
+      // Find JSON object boundaries
       final start = text.indexOf('{');
       final end = text.lastIndexOf('}');
-      if (start == -1 || end == -1) return _getEmptyProfile();
-      return jsonDecode(text.substring(start, end + 1)) as Map<String, dynamic>;
+      if (start == -1 || end == -1) {
+        debugPrint('[GeminiService] No JSON object found in response');
+        return _getEmptyProfile();
+      }
+      
+      final jsonText = text.substring(start, end + 1);
+      final decoded = jsonDecode(jsonText) as Map<String, dynamic>;
+      
+      // Validate required fields exist
+      if (!decoded.containsKey('confidence')) {
+        debugPrint('[GeminiService] Missing confidence field in response');
+        decoded['confidence'] = 0.0;
+      }
+      if (!decoded.containsKey('missing_info')) {
+        decoded['missing_info'] = <String>[];
+      }
+      
+      return decoded;
+    } on FormatException catch (e) {
+      debugPrint('[GeminiService] JSON format error: $e');
+      return _getEmptyProfile();
     } catch (e) {
       debugPrint('[GeminiService] JSON parse error: $e');
       return _getEmptyProfile();

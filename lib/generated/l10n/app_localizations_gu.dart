@@ -399,5 +399,31 @@ class AppLocalizationsGu extends AppLocalizations {
   String get helpButton => '‌ ‌';
 
   @override
-  String get pullToRefresh => '‌ ‌';
+  String get pullToRefresh => 'રિફ્રેશ કરવા ટાંકો';
+
+  @override
+  String get aiGreeting =>
+      'નમસ્તે! હું અધિકાર AI છું. સરકારી યોજનાઓ વિશે કંઈ પણ પૂછો.';
+
+  @override
+  String get askScheme => 'કોઈપણ યોજના વિશે પૂછો...';
+
+  @override
+  String get profileReview => 'પ્રોફાઇલ સમીક્ષા';
+
+  @override
+  String get noProfileData =>
+      'પ્રોફાઇલ મળી નથી. કૃપા કરીને પાછા જાઓ અને ફરી બોલો.';
+
+  @override
+  String get discover => 'શોધો';
+
+  @override
+  String get schemes => 'યોજનાઓ';
+
+  @override
+  String get aiChat => 'AI ચેટ';
+
+  @override
+  String get history => 'ઇતિહાસ';
 }

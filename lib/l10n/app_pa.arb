@@ -132,5 +132,13 @@
   "maritalStatus": "ਵਿਆਹੁਤਾ",
   "disability": "ਅਪਾਹਜਤਾ",
   "helpButton": "ਮਦਦ?",
-  "pullToRefresh": "ਰਿਫ਼ਰੈਸ਼"
+  "pullToRefresh": "ਰਿਫ਼ਰੈਸ਼",
+  "aiGreeting": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਅਧਿਕਾਰ AI ਹਾਂ। ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ।",
+  "askScheme": "ਕਿਸੇ ਵੀ ਯੋਜਨਾ ਬਾਰੇ ਪੁੱਛੋ...",
+  "profileReview": "ਪ੍ਰੋਫਾਈਲ ਸਮੀਖਿਆ",
+  "noProfileData": "ਪ੍ਰੋਫਾਈਲ ਨਹੀਂ ਮਿਲੀ। ਕਿਰਪਾ ਕਰਕੇ ਵਾਪਸ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਬੋਲੋ।",
+  "discover": "ਖੋਜੋ",
+  "schemes": "ਯੋਜਨਾਵਾਂ",
+  "aiChat": "AI ਚੈਟ",
+  "history": "ਇਤਿਹਾਸ"
 }

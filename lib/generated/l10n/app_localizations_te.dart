@@ -411,4 +411,30 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'రిఫ్రెష్ చేయడానికి లాగండి';
+
+  @override
+  String get aiGreeting =>
+      'నమస్కారం! నేను అధికార్ AI. ప్రభుత్వ పథకాల గురించి ఏదైనా అడగండి.';
+
+  @override
+  String get askScheme => 'ఏదైనా పథకం గురించి అడగండి...';
+
+  @override
+  String get profileReview => 'ప్రొఫైల్ సమీక్ష';
+
+  @override
+  String get noProfileData =>
+      'ప్రొఫైల్ కనుగొనబడలేదు. దయచేసి వెనుకకు వెళ్లి మళ్ళీ మాట్లాడండి.';
+
+  @override
+  String get discover => 'కనుగొనండి';
+
+  @override
+  String get schemes => 'పథకాలు';
+
+  @override
+  String get aiChat => 'AI చాట్';
+
+  @override
+  String get history => 'చరిత్ర';
 }

@@ -401,4 +401,30 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'ਰਿਫ਼ਰੈਸ਼';
+
+  @override
+  String get aiGreeting =>
+      'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਅਧਿਕਾਰ AI ਹਾਂ। ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ।';
+
+  @override
+  String get askScheme => 'ਕਿਸੇ ਵੀ ਯੋਜਨਾ ਬਾਰੇ ਪੁੱਛੋ...';
+
+  @override
+  String get profileReview => 'ਪ੍ਰੋਫਾਈਲ ਸਮੀਖਿਆ';
+
+  @override
+  String get noProfileData =>
+      'ਪ੍ਰੋਫਾਈਲ ਨਹੀਂ ਮਿਲੀ। ਕਿਰਪਾ ਕਰਕੇ ਵਾਪਸ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਬੋਲੋ।';
+
+  @override
+  String get discover => 'ਖੋਜੋ';
+
+  @override
+  String get schemes => 'ਯੋਜਨਾਵਾਂ';
+
+  @override
+  String get aiChat => 'AI ਚੈਟ';
+
+  @override
+  String get history => 'ਇਤਿਹਾਸ';
 }

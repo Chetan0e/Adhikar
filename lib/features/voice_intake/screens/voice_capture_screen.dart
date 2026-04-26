@@ -8,6 +8,8 @@ import '../../../../core/constants/supported_languages.dart';
 import '../../../../core/services/voice_service.dart';
 import '../../../../core/services/tts_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/remote/gemini_service.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class VoiceCaptureScreen extends StatefulWidget {
   const VoiceCaptureScreen({super.key});
@@ -19,10 +21,12 @@ class VoiceCaptureScreen extends StatefulWidget {
 class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
   final VoiceService _voiceService = VoiceService();
   final TtsService _ttsService = TtsService();
+  final GeminiService _geminiService = GeminiService();
 
   String _transcript = '';
   bool _isListening = false;
   bool _isInitialized = false;
+  bool _isExtracting = false;
   String _languageCode = 'en';
 
   @override
@@ -43,8 +47,9 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
       setState(() => _isInitialized = voiceInit);
 
       // Speak welcome message in selected language
+      final l10n = AppLocalizations.of(context);
       await _ttsService.speak(
-        'Please describe your situation in your own words',
+        l10n.speakPrompt,
         _languageCode,
       );
     }
@@ -80,18 +85,55 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
     setState(() => _isListening = false);
   }
 
-  void _handleContinue() {
+  void _handleContinue() async {
     if (_transcript.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please speak or type your information')),
+        SnackBar(content: Text(l10n.pleaseSpeak)),
       );
       return;
     }
-    Navigator.pushNamed(
-      context,
-      AppRouter.profile,
-      arguments: {'transcript': _transcript},
-    );
+
+    setState(() => _isExtracting = true);
+
+    try {
+      // Extract profile using Gemini before navigation
+      final langCode = context.read<LanguageCubit>().currentLanguageCode;
+      final langInstruction = SupportedLanguages.geminiLanguageInstruction(langCode);
+      
+      final profileData = await _geminiService.extractProfile(
+        _transcript,
+        languageHint: langInstruction,
+      );
+
+      if (mounted) {
+        setState(() => _isExtracting = false);
+        
+        // Navigate with extracted profile data
+        Navigator.pushNamed(
+          context,
+          AppRouter.profile,
+          arguments: {'transcript': _transcript, 'profileData': profileData},
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isExtracting = false);
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+        // Even on error, navigate with empty profile so user can fill manually
+        Navigator.pushNamed(
+          context,
+          AppRouter.profile,
+          arguments: {'transcript': _transcript, 'profileData': null},
+        );
+      }
+    }
   }
 
   @override
@@ -103,6 +145,8 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return BlocListener<LanguageCubit, LanguageState>(
       listenWhen: (prev, curr) => prev.languageCode != curr.languageCode,
       listener: (context, state) {
@@ -114,7 +158,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
         backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Voice Input'),
+          title: Text(l10n.voiceInputTitle),
           elevation: 0,
           actions: [
             // Settings icon
@@ -145,7 +189,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
 
                 // Header
                 Text(
-                  'Describe your situation',
+                  l10n.voiceInputTitle,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ).animate().fadeIn(duration: 400.ms),
@@ -153,7 +197,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Speak about yourself, your family, income, occupation, etc.',
+                  l10n.voiceInputSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -214,7 +258,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                 // Listening status
                 if (_isListening)
                   Text(
-                    'Listening...',
+                    l10n.listening,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.secondary,
                       fontWeight: FontWeight.w600,
@@ -223,7 +267,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
 
                 if (!_isListening && _transcript.isNotEmpty)
                   Text(
-                    'Tap to speak again',
+                    l10n.tapToSpeakAgain,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -245,7 +289,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Transcript',
+                        l10n.transcriptLabel,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -253,7 +297,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                       const SizedBox(height: 12),
                       Text(
                         _transcript.isEmpty
-                            ? 'Your speech will appear here...'
+                            ? l10n.transcriptHint
                             : _transcript,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
@@ -267,7 +311,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                 TextButton.icon(
                   onPressed: _showManualInputDialog,
                   icon: const Icon(Icons.edit),
-                  label: const Text('Type instead of speaking'),
+                  label: Text(l10n.typeInstead),
                 ).animate().fadeIn(delay: 300.ms, duration: 400.ms),
 
                 const SizedBox(height: 16),
@@ -276,8 +320,17 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _transcript.isNotEmpty ? _handleContinue : null,
-                    child: const Text('Continue'),
+                    onPressed: _isExtracting ? null : (_transcript.isNotEmpty ? _handleContinue : null),
+                    child: _isExtracting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(l10n.continueButton),
                   ),
                 ).animate().fadeIn(delay: 400.ms, duration: 400.ms),
 
@@ -291,22 +344,25 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
   }
 
   Widget _buildListeningChip() {
-    final langName = SupportedLanguages.languages[_languageCode] ?? 'English';
+    final langName = SupportedLanguages.nativeNames[_languageCode] ?? 
+                     SupportedLanguages.languages[_languageCode] ?? 'English';
+    final l10n = AppLocalizations.of(context);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.hearing, color: AppColors.primary, size: 16),
+          const Icon(Icons.hearing, color: AppColors.primary, size: 16),
           const SizedBox(width: 6),
           Text(
-            'Listening in: $langName',
-            style: TextStyle(
+            l10n.listeningIn(langName),
+            style: const TextStyle(
               color: AppColors.primary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -318,31 +374,32 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
   }
 
   void _showManualInputDialog() {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: _transcript);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Enter your information'),
+        title: Text(l10n.enterYourInfo),
         content: SingleChildScrollView(
           child: TextField(
             controller: controller,
             maxLines: 6,
-            decoration: const InputDecoration(
-              hintText: 'Describe your situation...',
+            decoration: InputDecoration(
+              hintText: l10n.describeHint,
             ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               setState(() => _transcript = controller.text);
               Navigator.pop(dialogContext);
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),

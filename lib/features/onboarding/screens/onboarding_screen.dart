@@ -7,6 +7,7 @@ import '../../../../core/blocs/language/language_state.dart';
 import '../../../../core/constants/supported_languages.dart';
 import '../../../../core/services/tts_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -81,6 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return BlocBuilder<LanguageCubit, LanguageState>(
       builder: (context, langState) {
         final slides = _getSlides(context, langState.languageCode);
+        final l10n = AppLocalizations.of(context)!;
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -93,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: TextButton(
                     onPressed: _currentPage < 3 ? _skipToLast : null,
                     child: Text(
-                      _currentPage < 3 ? 'Skip' : '',
+                      _currentPage < 3 ? l10n.skipOnboarding : '',
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
@@ -131,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                       child: Text(
-                        _currentPage == 3 ? 'Get Started' : 'Next',
+                        _currentPage == 3 ? l10n.getStarted : l10n.next,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -170,35 +172,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   List<_OnboardingSlideData> _getSlides(BuildContext context, String langCode) {
+    final l10n = AppLocalizations.of(context)!;
     final example = SupportedLanguages.onboardingExamples[langCode] ??
         SupportedLanguages.onboardingExamples['en']!;
 
     return [
       _OnboardingSlideData(
         emoji: '🏛️',
-        title: 'Welcome to Adhikar',
-        body: 'Your personal guide to every government welfare scheme you deserve — in your language.',
+        title: l10n.onboarding1Title,
+        body: l10n.onboarding1Body,
         example: null,
         color: AppColors.primary,
       ),
       _OnboardingSlideData(
         emoji: '🎤',
-        title: 'Speak Your Situation',
-        body: 'Just tap the mic and describe yourself — your age, occupation, family, income. Our AI understands your language.',
+        title: l10n.onboarding2Title,
+        body: l10n.onboarding2Body,
         example: example,
         color: const Color(0xFF7C3AED),
       ),
       _OnboardingSlideData(
         emoji: '✅',
-        title: 'Discover Your Benefits',
-        body: 'We match your profile to 200+ government schemes and show you exactly what you\'re entitled to — with benefit amounts.',
+        title: l10n.onboarding3Title,
+        body: l10n.onboarding3Body,
         example: null,
         color: const Color(0xFF059669),
       ),
       _OnboardingSlideData(
         emoji: '📄',
-        title: 'Apply Instantly',
-        body: 'We auto-fill application forms for you. Find the nearest office on the map. Track your application status live.',
+        title: l10n.onboarding4Title,
+        body: l10n.onboarding4Body,
         example: null,
         color: const Color(0xFFD97706),
       ),

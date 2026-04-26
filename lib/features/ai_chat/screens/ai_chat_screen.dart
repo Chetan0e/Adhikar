@@ -5,6 +5,7 @@ import '../../../core/blocs/language/language_cubit.dart';
 import '../../../core/services/tts_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/remote/gemini_service.dart';
+import '../../../generated/l10n/app_localizations.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -36,9 +37,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
     _ttsService.init();
     // Welcome message
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _addBotMessage(
-        _getWelcomeMessage(context.read<LanguageCubit>().currentLanguageCode),
-      );
+      final l10n = AppLocalizations.of(context);
+      if (l10n != null) {
+        _addBotMessage(l10n.aiGreeting);
+      }
     });
   }
 
@@ -51,32 +53,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
     super.dispose();
   }
 
-  String _getWelcomeMessage(String langCode) {
-    switch (langCode) {
-      case 'hi':
-        return 'नमस्ते! मैं आधिकार AI हूँ। सरकारी योजनाओं के बारे में कोई भी सवाल पूछें।';
-      case 'mr':
-        return 'नमस्कार! मी आधिकार AI आहे. सरकारी योजनांबद्दल काहीही विचारा.';
-      case 'ta':
-        return 'வணக்கம்! நான் அதிகார் AI. அரசு திட்டங்கள் பற்றி கேளுங்கள்.';
-      case 'te':
-        return 'నమస్కారం! నేను అధికార్ AI. ప్రభుత్వ పథకాల గురించి ఏదైనా అడగండి.';
-      case 'kn':
-        return 'ನಮಸ್ಕಾರ! ನಾನು ಅಧಿಕಾರ್ AI. ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಯಾವುದೇ ಪ್ರಶ್ನೆ ಕೇಳಿ.';
-      case 'bn':
-        return 'নমস্কার! আমি অধিকার AI। সরকারি প্রকল্প সম্পর্কে যেকোনো প্রশ্ন করুন।';
-      case 'gu':
-        return 'નમસ્તે! હું અધિકાર AI છું. સરકારી યોજનાઓ વિશે કંઈ પણ પૂછો.';
-      case 'ml':
-        return 'നമസ്കാരം! ഞാൻ അധിക്കാർ AI ആണ്. സർക്കാർ പദ്ധതികളെ കുറിച്ച് ചോദിക്കൂ.';
-      case 'or':
-        return 'ନମସ୍କାର! ମୁଁ ଅଧିକାର AI। ସରକାରୀ ଯୋଜନା ବିଷୟରେ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ।';
-      case 'pa':
-        return 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਅਧਿਕਾਰ AI ਹਾਂ। ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛੋ।';
-      default:
-        return 'Hello! I\'m Adhikar AI. Ask me anything about government welfare schemes — eligibility, documents, benefits, and how to apply.';
-    }
-  }
 
   void _addBotMessage(String text) {
     setState(() {
@@ -124,7 +100,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _addBotMessage('Sorry, something went wrong. Please try again.');
+        final l10n = AppLocalizations.of(context);
+        _addBotMessage(l10n?.geminiError ?? 'Sorry, something went wrong. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isTyping = false);
@@ -148,14 +125,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
               child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 10),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Adhikar AI', style: TextStyle(fontSize: 16)),
+                Text(AppLocalizations.of(context)!.aiChat, style: const TextStyle(fontSize: 16)),
                 Text(
                   'Scheme Assistant',
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -194,6 +171,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -201,7 +179,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           const Text('🤖', style: TextStyle(fontSize: 64)),
           const SizedBox(height: 16),
           Text(
-            'Ask Adhikar AI',
+            'Ask ${l10n.aiChat}',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: AppColors.primary,
             ),
@@ -268,7 +246,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               maxLines: 3,
               minLines: 1,
               decoration: InputDecoration(
-                hintText: 'Ask about any scheme…',
+                hintText: AppLocalizations.of(context)!.askScheme,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: const BorderSide(color: AppColors.border),

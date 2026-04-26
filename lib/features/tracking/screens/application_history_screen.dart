@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../generated/l10n/app_localizations.dart';
 
 /// Application History screen — shows all past applications from Hive/Firestore
 class ApplicationHistoryScreen extends StatefulWidget {
@@ -23,34 +24,14 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
 
   Future<void> _loadApplications() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800)); // Simulate load
+    
+    // TODO: Implement actual Firestore + Hive data loading
+    // For now, return empty list - will be implemented with SchemeRepository
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    // TODO: Replace with actual Firestore + Hive data
     if (mounted) {
       setState(() {
-        _applications = [
-          _AppRecord(
-            id: 'APP2024001',
-            schemeName: 'PM-KISAN Samman Nidhi',
-            status: AppStatus.approved,
-            submittedDate: '12 Jan 2025',
-            benefit: '₹6,000/year',
-          ),
-          _AppRecord(
-            id: 'APP2024002',
-            schemeName: 'Pradhan Mantri Awas Yojana',
-            status: AppStatus.underReview,
-            submittedDate: '3 Mar 2025',
-            benefit: '₹1,20,000',
-          ),
-          _AppRecord(
-            id: 'APP2024003',
-            schemeName: 'Ayushman Bharat',
-            status: AppStatus.submitted,
-            submittedDate: '20 Apr 2025',
-            benefit: '₹5 Lakh/year',
-          ),
-        ];
+        _applications = [];
         _isLoading = false;
       });
     }
@@ -58,10 +39,12 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Application History'),
+        title: Text(l10n.applicationHistory),
         elevation: 0,
       ),
       body: _isLoading
@@ -83,6 +66,8 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,12 +75,12 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
           const Text('📋', style: TextStyle(fontSize: 64)),
           const SizedBox(height: 16),
           Text(
-            'No applications yet.',
+            l10n.noApplications,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            'Discover your schemes!',
+            l10n.tryUpdatingProfile,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -103,7 +88,7 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Explore Schemes'),
+            child: Text(l10n.eligibleSchemes),
           ),
         ],
       ).animate().fadeIn(duration: 400.ms),
@@ -156,15 +141,16 @@ class _ApplicationCardState extends State<_ApplicationCard> {
   }
 
   String get _statusLabel {
+    final l10n = AppLocalizations.of(context);
     switch (widget.record.status) {
       case AppStatus.submitted:
-        return 'Submitted';
+        return l10n.statusSubmitted;
       case AppStatus.underReview:
-        return 'Under Review';
+        return l10n.statusUnderReview;
       case AppStatus.approved:
-        return 'Approved';
+        return l10n.statusApproved;
       case AppStatus.rejected:
-        return 'Rejected';
+        return l10n.statusRejected;
     }
   }
 

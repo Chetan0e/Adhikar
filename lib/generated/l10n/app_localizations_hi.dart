@@ -409,4 +409,30 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'रिफ्रेश करने के लिए खींचें';
+
+  @override
+  String get aiGreeting =>
+      'नमस्ते! मैं अधिकार AI हूँ। सरकारी योजनाओं के बारे में कोई भी सवाल पूछें।';
+
+  @override
+  String get askScheme => 'कोई भी योजना के बारे में पूछें...';
+
+  @override
+  String get profileReview => 'प्रोफ़ाइल समीक्षा';
+
+  @override
+  String get noProfileData =>
+      'प्रोफ़ाइल नहीं मिली। कृपया वापस जाएं और दोबारा बोलें।';
+
+  @override
+  String get discover => 'खोजें';
+
+  @override
+  String get schemes => 'योजनाएं';
+
+  @override
+  String get aiChat => 'AI चैट';
+
+  @override
+  String get history => 'इतिहास';
 }

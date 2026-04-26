@@ -7,6 +7,7 @@ import '../../../../core/constants/supported_languages.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/user_profile.dart';
 import '../../../../data/remote/gemini_service.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class ProfileReviewScreen extends StatefulWidget {
   const ProfileReviewScreen({super.key});
@@ -70,7 +71,17 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
     }
 
     _transcript = args['transcript'] as String? ?? '';
+    final profileData = args['profileData'] as Map<String, dynamic>?;
 
+    // If profile data is already provided, use it directly
+    if (profileData != null) {
+      _profile = UserProfile.fromJson(profileData);
+      _populateControllers();
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    // Otherwise, extract from transcript
     if (_transcript.isNotEmpty) {
       // Build language-aware Gemini prompt
       final langCode = context.read<LanguageCubit>().currentLanguageCode;
@@ -191,7 +202,7 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profile Review'),
+        title: Text(AppLocalizations.of(context)!.profileReview),
         elevation: 0,
         actions: [
           if (!_isLoading && _profile != null)
@@ -204,14 +215,14 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
                 }
               },
               icon: Icon(_isEditing ? Icons.check : Icons.edit, size: 18),
-              label: Text(_isEditing ? 'Save' : 'Edit'),
+              label: Text(_isEditing ? AppLocalizations.of(context)!.save : AppLocalizations.of(context)!.editProfile),
             ),
         ],
       ),
       body: _isLoading
           ? _buildLoadingState()
           : _profile == null
-              ? const Center(child: Text('No profile data. Go back and try again.'))
+              ? Center(child: Text(AppLocalizations.of(context)!.noProfileData))
               : SafeArea(
                   child: SingleChildScrollView(
                     padding:
@@ -287,7 +298,7 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
                           child: ElevatedButton.icon(
                             onPressed: _handleContinue,
                             icon: const Icon(Icons.search),
-                            label: const Text('Find Eligible Schemes'),
+                            label: Text(AppLocalizations.of(context)!.eligibleSchemes),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),

@@ -132,5 +132,13 @@
   "maritalStatus": "ବୈବାହିକ",
   "disability": "ଅକ୍ଷମ",
   "helpButton": "ସାହାଯ୍ୟ?",
-  "pullToRefresh": "ରିଫ୍ରେଶ"
+  "pullToRefresh": "ରିଫ୍ରେଶ",
+  "aiGreeting": "ନମସ୍କାର! ମୁଁ ଅଧିକାର AI। ସରକାରୀ ଯୋଜନା ବିଷୟରେ କିଛି ପଚାର କରନ୍ତୁ।",
+  "askScheme": "କୌଣସି ଯୋଜନା ବିଷୟରେ ପଚାର କରନ୍ତୁ...",
+  "profileReview": "ପ୍ରୋଫାଇଲ ସମୀକ୍ଷା",
+  "noProfileData": "ପ୍ରୋଫାଇଲ ମିଳିଲା ନାହିଁ। ଦୟାକରି ଫେରନ୍ତୁ ଏବଂ ପୁଣି କୁହନ୍ତୁ।",
+  "discover": "ଖୋଜନ୍ତୁ",
+  "schemes": "ଯୋଜନା",
+  "aiChat": "AI ଚାଟ୍",
+  "history": "ଇତିହାସ"
 }

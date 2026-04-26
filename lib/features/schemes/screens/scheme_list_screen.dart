@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../../../../app/router.dart';
 import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../core/blocs/language/language_state.dart';
@@ -22,6 +24,8 @@ class SchemeListScreen extends StatefulWidget {
 class _SchemeListScreenState extends State<SchemeListScreen> {
   final EligibilityEngine _eligibilityEngine = EligibilityEngine();
   final TtsService _ttsService = TtsService();
+
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
   UserProfile? _profile;
   List<SchemeMatch> _matchedSchemes = [];
@@ -47,10 +51,19 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   }
 
   Future<void> _loadData() async {
+    print('[SchemeList] _loadData called');
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args == null) {
-      // Called from HomeScreen tab — show all schemes without profile filter
-      _loadAllSchemes();
+      // Called from HomeScreen tab — load all schemes from local database
+      print('[SchemeList] Loading from local database (no profile)');
+      setState(() => _isLoading = true);
+      try {
+        await _loadSchemes();
+      } catch (e) {
+        print('[SchemeList] Error in _loadSchemes: $e');
+      }
+      setState(() => _isLoading = false);
+      print('[SchemeList] Loading complete, _isLoading = false');
       return;
     }
 
@@ -59,42 +72,69 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
     final argMap = args as Map;
     _profile = UserProfile.fromJson(Map<String, dynamic>.from(argMap));
 
-    final schemesData = SchemesDatabase.getAllSchemes();
-    final schemes = schemesData.map((e) => Scheme.fromJson(e)).toList();
+    // Load from Firestore
+    try {
+      final schemesSnapshot = await _firestore
+          .collection('schemes')
+          .where('is_active', isEqualTo: true)
+          .get();
+      
+      final schemes = schemesSnapshot.docs.map((doc) {
+        final data = doc.data();
+        // Convert Firestore format to Scheme model format
+        return Scheme.fromJson(data);
+      }).toList();
 
-    _matchedSchemes = _eligibilityEngine.matchSchemes(_profile!, schemes);
-    _filteredSchemes = List.from(_matchedSchemes);
+      _matchedSchemes = _eligibilityEngine.matchSchemes(_profile!, schemes);
+      _filteredSchemes = List.from(_matchedSchemes);
 
-    // Speak results in selected language
-    if (mounted) {
-      final langCode = context.read<LanguageCubit>().currentLanguageCode;
-      final count = _filteredSchemes.length;
-      final totalBenefit = _filteredSchemes.fold<double>(
-        0,
-        (sum, match) => sum + _eligibilityEngine.extractBenefitAmount(match.estimatedBenefit),
-      );
-      final msg = _buildResultMessage(langCode, count, totalBenefit);
-      await _ttsService.init();
-      await _ttsService.speak(msg, langCode);
+      // Speak results in selected language
+      if (mounted) {
+        final langCode = context.read<LanguageCubit>().currentLanguageCode;
+        final count = _filteredSchemes.length;
+        final totalBenefit = _filteredSchemes.fold<double>(
+          0,
+          (sum, match) => sum + _eligibilityEngine.extractBenefitAmount(match.estimatedBenefit),
+        );
+        final msg = _buildResultMessage(langCode, count, totalBenefit);
+        await _ttsService.init();
+        await _ttsService.speak(msg, langCode);
+      }
+    } catch (e) {
+      print('Error loading schemes from Firestore: $e');
+      _matchedSchemes = [];
+      _filteredSchemes = [];
     }
 
     if (mounted) setState(() => _isLoading = false);
   }
 
-  void _loadAllSchemes() {
-    setState(() => _isLoading = true);
-    final schemesData = SchemesDatabase.getAllSchemes();
-    final schemes = schemesData.map((e) => Scheme.fromJson(e)).toList();
-    // Wrap as SchemeMatch with 100% confidence when browsing without profile
-    _matchedSchemes = schemes.map((s) => SchemeMatch(
-      scheme: s,
-      confidence: 1.0,
-      reasons: ['Browse all schemes'],
-      missingDocuments: [],
-      estimatedBenefit: s.benefitAmount,
-    )).toList();
-    _filteredSchemes = List.from(_matchedSchemes);
-    if (mounted) setState(() => _isLoading = false);
+  Future<void> _loadSchemes() async {
+    print('[SchemeList] _loadSchemes started');
+    try {
+      // Load all schemes from local database
+      print('[SchemeList] Getting schemes from SchemesDatabase');
+      final schemesData = SchemesDatabase.getAllSchemes();
+      print('[SchemeList] Found ${schemesData.length} schemes in database');
+      final schemes = schemesData.map((data) => Scheme.fromJson(data)).toList();
+      
+      // Create SchemeMatch objects with default confidence
+      _matchedSchemes = schemes.map((scheme) => SchemeMatch(
+        scheme: scheme,
+        confidence: 1.0,
+        reasons: ['Browse all schemes'],
+        missingDocuments: [],
+        estimatedBenefit: scheme.benefitAmount,
+      )).toList();
+      
+      _filteredSchemes = List.from(_matchedSchemes);
+      print('[SchemeList] Loaded ${_matchedSchemes.length} schemes');
+    } catch (e) {
+      print('[SchemeList] Error loading schemes from local database: $e');
+      _matchedSchemes = [];
+      _filteredSchemes = [];
+    }
+    print('[SchemeList] _loadSchemes completed');
   }
 
   String _buildResultMessage(String langCode, int count, double totalBenefit) {
@@ -132,12 +172,15 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   }
 
   void _applyFilters() {
+    final langCode = context.read<LanguageCubit>().currentLanguageCode;
     _filteredSchemes = _matchedSchemes.where((match) {
       final categoryMatch =
           _selectedCategory == 'All' || match.scheme.category == _selectedCategory;
+      final name = match.scheme.nameForLocale(langCode);
+      final description = match.scheme.descriptionForLocale(langCode);
       final searchMatch = _searchQuery.isEmpty ||
-          match.scheme.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          match.scheme.description.toLowerCase().contains(_searchQuery.toLowerCase());
+          name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          description.toLowerCase().contains(_searchQuery.toLowerCase());
       return categoryMatch && searchMatch;
     }).toList();
   }
@@ -161,20 +204,29 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   Widget build(BuildContext context) {
     return BlocListener<LanguageCubit, LanguageState>(
       listenWhen: (p, c) => p.languageCode != c.languageCode,
-      listener: (_, __) => setState(() {}), // rebuild for localized labels
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildSearchBar(),
-              _buildCategoryFilter(),
-              _buildResultsSummary(),
-              Expanded(child: _buildSchemeList()),
-            ],
+      listener: (_, __) {
+        setState(() {}); // rebuild for localized labels
+        _applyFilters(); // reapply filters with new language
+      },
+      child: BlocBuilder<LanguageCubit, LanguageState>(
+        builder: (context, langState) {
+          return Scaffold(
+            backgroundColor: AppColors.background,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  _buildSearchBar(),
+                  _buildCategoryFilter(),
+                  _buildResultsSummary(),
+                  Expanded(
+            child: _buildSchemeList(),
           ),
-        ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -419,10 +471,13 @@ class _SchemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langCode = context.read<LanguageCubit>().currentLanguageCode;
     final scheme = match.scheme;
     final confidence = match.confidence;
     final catColor = AppColors.forCategory(scheme.category);
     final pct = (confidence * 100).round();
+    final displayName = scheme.nameForLocale(langCode);
+    final displayDescription = scheme.descriptionForLocale(langCode);
 
     return GestureDetector(
       onTap: onTap,
@@ -472,7 +527,7 @@ class _SchemeCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          scheme.name,
+                          displayName,
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -480,9 +535,9 @@ class _SchemeCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (scheme.nameHindi.isNotEmpty)
+                        if (displayDescription.isNotEmpty)
                           Text(
-                            scheme.nameHindi,
+                            displayDescription,
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -578,6 +633,159 @@ class _SchemeCard extends StatelessWidget {
     if (confidence >= 0.8) return AppColors.accentGreen;
     if (confidence >= 0.6) return AppColors.warning;
     return AppColors.error;
+  }
+
+  IconData _categoryIcon(String category) {
+    switch (category) {
+      case 'agriculture': return Icons.grass;
+      case 'health': return Icons.health_and_safety;
+      case 'education': return Icons.school;
+      case 'housing': return Icons.home;
+      case 'women': return Icons.woman;
+      case 'employment': return Icons.work;
+      case 'disability': return Icons.accessible;
+      case 'senior': return Icons.elderly;
+      default: return Icons.public;
+    }
+  }
+}
+
+class _FirestoreSchemeCard extends StatelessWidget {
+  final Scheme scheme;
+  final String langCode;
+  final VoidCallback onTap;
+  final int delay;
+
+  const _FirestoreSchemeCard({
+    required this.scheme,
+    required this.langCode,
+    required this.onTap,
+    required this.delay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final catColor = AppColors.forCategory(scheme.category);
+    final displayName = scheme.nameForLocale(langCode);
+    final displayDescription = scheme.descriptionForLocale(langCode);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Category color stripe + scheme name
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+              decoration: BoxDecoration(
+                color: catColor.withValues(alpha: 0.05),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category icon
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      _categoryIcon(scheme.category),
+                      color: catColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Scheme name and description
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          displayDescription,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Benefit + Category + Arrow row
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+              child: Row(
+                children: [
+                  const Icon(Icons.currency_rupee, size: 16, color: AppColors.accentGreen),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      scheme.benefitAmount,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.accentGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      SchemeCategories.categoryNames[scheme.category] ?? scheme.category,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: catColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(
+          delay: Duration(milliseconds: delay),
+          duration: 350.ms,
+        );
   }
 
   IconData _categoryIcon(String category) {

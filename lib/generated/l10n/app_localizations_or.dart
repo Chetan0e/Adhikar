@@ -401,4 +401,30 @@ class AppLocalizationsOr extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'ରିଫ୍ରେଶ';
+
+  @override
+  String get aiGreeting =>
+      'ନମସ୍କାର! ମୁଁ ଅଧିକାର AI। ସରକାରୀ ଯୋଜନା ବିଷୟରେ କିଛି ପଚାର କରନ୍ତୁ।';
+
+  @override
+  String get askScheme => 'କୌଣସି ଯୋଜନା ବିଷୟରେ ପଚାର କରନ୍ତୁ...';
+
+  @override
+  String get profileReview => 'ପ୍ରୋଫାଇଲ ସମୀକ୍ଷା';
+
+  @override
+  String get noProfileData =>
+      'ପ୍ରୋଫାଇଲ ମିଳିଲା ନାହିଁ। ଦୟାକରି ଫେରନ୍ତୁ ଏବଂ ପୁଣି କୁହନ୍ତୁ।';
+
+  @override
+  String get discover => 'ଖୋଜନ୍ତୁ';
+
+  @override
+  String get schemes => 'ଯୋଜନା';
+
+  @override
+  String get aiChat => 'AI ଚାଟ୍';
+
+  @override
+  String get history => 'ଇତିହାସ';
 }

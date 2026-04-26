@@ -163,5 +163,14 @@
   "maritalStatus": "Marital Status",
   "disability": "Disability",
   "helpButton": "Need help?",
-  "pullToRefresh": "Pull to refresh"
+  "pullToRefresh": "Pull to refresh",
+  "aiGreeting": "Hello! I am Adhikar AI. Ask me anything about government schemes.",
+  "askScheme": "Ask about any scheme...",
+  "profileReview": "Profile Review",
+  "noProfileData": "No profile found. Please go back and speak again.",
+  "discover": "Discover",
+  "schemes": "Schemes",
+  "aiChat": "AI Chat",
+  "history": "History",
+  "settings": "Settings"
 }

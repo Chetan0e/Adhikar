@@ -409,4 +409,30 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'রিফ্রেশ করতে টানুন';
+
+  @override
+  String get aiGreeting =>
+      'নমস্কার! আমি অধিকার AI। সরকারি প্রকল্প সম্পর্কে যেকোনো প্রশ্ন করুন।';
+
+  @override
+  String get askScheme => 'যেকোনো প্রকল্প সম্পর্কে জিজ্ঞাসা করুন...';
+
+  @override
+  String get profileReview => 'প্রোফাইল পর্যালোচনা';
+
+  @override
+  String get noProfileData =>
+      'প্রোফাইল পাওয়া যায়নি। দয়া করে ফিরে যান এবং আবার বলুন।';
+
+  @override
+  String get discover => 'আবিষ্কার করুন';
+
+  @override
+  String get schemes => 'প্রকল্পসমূহ';
+
+  @override
+  String get aiChat => 'AI চ্যাট';
+
+  @override
+  String get history => 'ইতিহাস';
 }

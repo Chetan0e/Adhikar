@@ -403,4 +403,30 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'റിഫ്രഷ്';
+
+  @override
+  String get aiGreeting =>
+      'നമസ്കാരം! ഞാൻ അധിക്കാര് AI ആണ്. സർക്കാർ പദ്ധതികളെ കുറിച്ച് എന്തെങ്കിലും ചോദിക്കുക.';
+
+  @override
+  String get askScheme => 'ഏതെങ്കിലും പദ്ധതിയെ കുറിച്ച് ചോദിക്കുക...';
+
+  @override
+  String get profileReview => 'പ്രൊഫൈൽ അവലോകനം';
+
+  @override
+  String get noProfileData =>
+      'പ്രൊഫൈൽ കിട്ടിയില്ല. ദയവായി തിരികെ പോയി വീണ്ടും സംസാരിക്കുക.';
+
+  @override
+  String get discover => 'കണ്ടെത്തുക';
+
+  @override
+  String get schemes => 'പദ്ധതികൾ';
+
+  @override
+  String get aiChat => 'AI ചാറ്റ്';
+
+  @override
+  String get history => 'ചരിത്രം';
 }

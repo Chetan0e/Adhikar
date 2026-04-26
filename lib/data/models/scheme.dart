@@ -1,11 +1,9 @@
 class Scheme {
   final String id;
-  final String name;
-  final String nameHindi;
-  final String nameLocal; // in detected language
+  final Map<String, String> names; // {en, hi, mr, ta, te, kn, bn, gu, ml, or, pa}
+  final Map<String, String> descriptions; // {en, hi, mr, ta, te, kn, bn, gu, ml, or, pa}
   final String category; // health, agriculture, education, housing, etc.
   final String ministry;
-  final String description;
   final String benefitAmount; // "₹6000/year" or "Free LPG connection"
   final EligibilityCriteria eligibility;
   final List<String> requiredDocuments;
@@ -16,12 +14,10 @@ class Scheme {
 
   Scheme({
     required this.id,
-    required this.name,
-    required this.nameHindi,
-    this.nameLocal = '',
+    required this.names,
+    required this.descriptions,
     required this.category,
     required this.ministry,
-    required this.description,
     required this.benefitAmount,
     required this.eligibility,
     required this.requiredDocuments,
@@ -31,15 +27,51 @@ class Scheme {
     required this.lastUpdated,
   });
 
+  /// Get scheme name for a specific language code
+  String nameForLocale(String langCode) =>
+      names[langCode] ?? names['en'] ?? '';
+
+  /// Get scheme description for a specific language code
+  String descriptionForLocale(String langCode) =>
+      descriptions[langCode] ?? descriptions['en'] ?? '';
+
+  /// Backward compatibility: get English name
+  String get name => names['en'] ?? '';
+
+  /// Backward compatibility: get Hindi name
+  String get nameHindi => names['hi'] ?? '';
+
   factory Scheme.fromJson(Map<String, dynamic> json) {
     return Scheme(
       id: json['id'],
-      name: json['name'],
-      nameHindi: json['name_hindi'] ?? json['name'],
-      nameLocal: json['name_local'] ?? '',
-      category: json['category'],
+      names: {
+        'en': json['name'] ?? json['name_en'] ?? '',
+        'hi': json['name_hindi'] ?? json['name_hi'] ?? '',
+        'mr': json['name_mr'] ?? '',
+        'ta': json['name_ta'] ?? '',
+        'te': json['name_te'] ?? '',
+        'kn': json['name_kn'] ?? '',
+        'bn': json['name_bn'] ?? '',
+        'gu': json['name_gu'] ?? '',
+        'ml': json['name_ml'] ?? '',
+        'or': json['name_or'] ?? '',
+        'pa': json['name_pa'] ?? '',
+      },
+      descriptions: {
+        'en': json['description'] ?? json['description_en'] ?? '',
+        'hi': json['description_hi'] ?? '',
+        'mr': json['description_mr'] ?? '',
+        'ta': json['description_ta'] ?? '',
+        'te': json['description_te'] ?? '',
+        'kn': json['description_kn'] ?? '',
+        'bn': json['description_bn'] ?? '',
+        'gu': json['description_gu'] ?? '',
+        'ml': json['description_ml'] ?? '',
+        'or': json['description_or'] ?? '',
+        'pa': json['description_pa'] ?? '',
+      },
+      category: json['category'] ?? '',
       ministry: json['ministry'] ?? '',
-      description: json['description'] ?? '',
       benefitAmount: json['benefit_amount'] ?? '',
       eligibility: EligibilityCriteria.fromJson(json['eligibility'] ?? {}),
       requiredDocuments: List<String>.from(json['required_documents'] ?? []),
@@ -55,12 +87,30 @@ class Scheme {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'name_hindi': nameHindi,
-      'name_local': nameLocal,
+      'name_en': names['en'] ?? '',
+      'name_hi': names['hi'] ?? '',
+      'name_mr': names['mr'] ?? '',
+      'name_ta': names['ta'] ?? '',
+      'name_te': names['te'] ?? '',
+      'name_kn': names['kn'] ?? '',
+      'name_bn': names['bn'] ?? '',
+      'name_gu': names['gu'] ?? '',
+      'name_ml': names['ml'] ?? '',
+      'name_or': names['or'] ?? '',
+      'name_pa': names['pa'] ?? '',
+      'description_en': descriptions['en'] ?? '',
+      'description_hi': descriptions['hi'] ?? '',
+      'description_mr': descriptions['mr'] ?? '',
+      'description_ta': descriptions['ta'] ?? '',
+      'description_te': descriptions['te'] ?? '',
+      'description_kn': descriptions['kn'] ?? '',
+      'description_bn': descriptions['bn'] ?? '',
+      'description_gu': descriptions['gu'] ?? '',
+      'description_ml': descriptions['ml'] ?? '',
+      'description_or': descriptions['or'] ?? '',
+      'description_pa': descriptions['pa'] ?? '',
       'category': category,
       'ministry': ministry,
-      'description': description,
       'benefit_amount': benefitAmount,
       'eligibility': eligibility.toJson(),
       'required_documents': requiredDocuments,

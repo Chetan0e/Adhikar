@@ -408,4 +408,30 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'ರಿಫ್ರೆಶ್ ಮಾಡಲು ಎಳೆಯಿರಿ';
+
+  @override
+  String get aiGreeting =>
+      'ನಮಸ್ಕಾರ! ನಾನು ಅಧಿಕಾರ್ AI. ಸರ್ಕಾರಿ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಏನನ್ನಾದರೂ ಕೇಳಿ.';
+
+  @override
+  String get askScheme => 'ಯಾವುದೇ ಯೋಜನೆಯ ಬಗ್ಗೆ ಕೇಳಿ...';
+
+  @override
+  String get profileReview => 'ಪ್ರೊಫೈಲ್ ಪುನರಾವಲೋಕನ';
+
+  @override
+  String get noProfileData =>
+      'ಪ್ರೊಫೈಲ್ ಸಿಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಹಿಂದಿರುಗಿ ಮತ್ತೆ ಮಾತನಾಡಿ.';
+
+  @override
+  String get discover => 'ಹುಡುಕಿ';
+
+  @override
+  String get schemes => 'ಯೋಜನೆಗಳು';
+
+  @override
+  String get aiChat => 'AI ಚಾಟ್';
+
+  @override
+  String get history => 'ಇತಿಹಾಸ';
 }

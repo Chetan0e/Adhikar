@@ -7,6 +7,7 @@ import '../../../core/blocs/language/language_cubit.dart';
 import '../../../core/constants/hive_boxes.dart';
 import '../../../core/constants/supported_languages.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../generated/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -52,21 +53,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final cubit = context.read<LanguageCubit>();
     final langCode = cubit.currentLanguageCode;
     final langName = SupportedLanguages.languages[langCode] ?? 'English';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
         elevation: 0,
       ),
       body: ListView(
         children: [
           // ─── Language ───
-          _SectionHeader(title: '🌐  Language'),
+          _SectionHeader(title: '🌐  ${l10n.language}'),
           _SettingsTile(
             leading: const Icon(Icons.language),
-            title: 'Change Language',
-            subtitle: 'Current: $langName',
+            title: l10n.changeLanguage,
+            subtitle: '${l10n.currentLanguage}: $langName',
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.pushNamed(context, AppRouter.language,
@@ -77,10 +79,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
 
           // ─── Voice & Sound ───
-          _SectionHeader(title: '🔊  Voice & Sound'),
+          _SectionHeader(title: '🔊  ${l10n.voiceAndSound}'),
           _SettingsTile(
             leading: const Icon(Icons.record_voice_over),
-            title: 'Enable TTS Narration',
+            title: l10n.enableTTS,
             trailing: Switch(
               value: _getBool(HiveBoxes.kTtsEnabled),
               onChanged: (v) => _setBool(HiveBoxes.kTtsEnabled, v),
@@ -89,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _SettingsTile(
             leading: const Icon(Icons.play_circle),
-            title: 'Auto-play Results',
+            title: l10n.autoPlayResults,
             trailing: Switch(
               value: _getBool(HiveBoxes.kAutoPlayResults),
               onChanged: (v) => _setBool(HiveBoxes.kAutoPlayResults, v),
@@ -101,15 +103,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Speech Speed',
-                    style: TextStyle(
+                Text(l10n.speechSpeed,
+                    style: const TextStyle(
                         fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Text('Slow',
+                    Text(l10n.slow,
                         style:
-                            TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                     Expanded(
                       child: Slider(
                         value: _getSpeechRate(),
@@ -123,9 +125,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
                     ),
-                    const Text('Fast',
+                    Text(l10n.fast,
                         style:
-                            TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
               ],
@@ -135,10 +137,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
 
           // ─── Notifications ───
-          _SectionHeader(title: '🔔  Notifications'),
+          _SectionHeader(title: '🔔  ${l10n.notifications}'),
           _SettingsTile(
             leading: const Icon(Icons.notifications_active),
-            title: 'Application Status Alerts',
+            title: l10n.statusAlerts,
             trailing: Switch(
               value: _getBool(HiveBoxes.kStatusAlerts),
               onChanged: (v) => _setBool(HiveBoxes.kStatusAlerts, v),
@@ -147,7 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _SettingsTile(
             leading: const Icon(Icons.description),
-            title: 'Document Reminders',
+            title: l10n.documentReminders,
             trailing: Switch(
               value: _getBool(HiveBoxes.kDocumentReminders),
               onChanged: (v) => _setBool(HiveBoxes.kDocumentReminders, v),
@@ -156,7 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _SettingsTile(
             leading: const Icon(Icons.new_releases),
-            title: 'New Scheme Alerts',
+            title: l10n.newSchemeAlerts,
             trailing: Switch(
               value: _getBool(HiveBoxes.kNewSchemeAlerts, defaultValue: false),
               onChanged: (v) => _setBool(HiveBoxes.kNewSchemeAlerts, v),
@@ -167,10 +169,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
 
           // ─── Accessibility ───
-          _SectionHeader(title: '♿  Accessibility'),
+          _SectionHeader(title: '♿  ${l10n.accessibility}'),
           _SettingsTile(
             leading: const Icon(Icons.text_fields),
-            title: 'Large Text Mode',
+            title: l10n.largeText,
             subtitle: 'Increases font scale to 1.3x',
             trailing: Switch(
               value: _getBool(HiveBoxes.kLargeTextMode, defaultValue: false),
@@ -180,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _SettingsTile(
             leading: const Icon(Icons.contrast),
-            title: 'High Contrast Mode',
+            title: l10n.highContrast,
             trailing: Switch(
               value: _getBool(HiveBoxes.kHighContrastMode, defaultValue: false),
               onChanged: (v) => _setBool(HiveBoxes.kHighContrastMode, v),
@@ -191,16 +193,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
 
           // ─── Data & Privacy ───
-          _SectionHeader(title: '🔒  Data & Privacy'),
+          _SectionHeader(title: '🔒  ${l10n.dataPrivacy}'),
           _SettingsTile(
             leading: const Icon(Icons.download),
-            title: 'Export My Data',
+            title: l10n.exportData,
             trailing: const Icon(Icons.chevron_right),
             onTap: _exportData,
           ),
           _SettingsTile(
             leading: const Icon(Icons.delete_forever, color: AppColors.error),
-            title: 'Delete My Account',
+            title: l10n.deleteAccount,
             titleColor: AppColors.error,
             trailing: const Icon(Icons.chevron_right, color: AppColors.error),
             onTap: _confirmDeleteAccount,
@@ -209,20 +211,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 1),
 
           // ─── About ───
-          _SectionHeader(title: 'ℹ️  About'),
+          _SectionHeader(title: 'ℹ️  ${l10n.about}'),
           _SettingsTile(
             leading: const Icon(Icons.info_outline),
-            title: 'App Version',
+            title: l10n.appVersion,
             subtitle: _appVersion,
           ),
           _SettingsTile(
             leading: const Icon(Icons.favorite, color: AppColors.accentGreen),
-            title: 'Built for Bharat 🇮🇳',
+            title: l10n.builtForBharat,
             subtitle: 'Making government accessible to all',
           ),
           _SettingsTile(
             leading: const Icon(Icons.email),
-            title: 'Contact Support',
+            title: l10n.contactSupport,
             subtitle: 'support@adhikar.gov.in',
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
@@ -241,16 +243,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _confirmDeleteAccount() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Account?'),
-        content: const Text(
-            'This will permanently delete all your data. This action cannot be undone.'),
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text(l10n.deleteConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
@@ -260,7 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SnackBar(content: Text('Account deletion requested')),
               );
             },
-            child: const Text('Delete'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),

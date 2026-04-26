@@ -132,5 +132,13 @@
   "maritalStatus": "‌ ‌",
   "disability": "‌ ‌",
   "helpButton": "‌ ‌",
-  "pullToRefresh": "‌ ‌"
+  "pullToRefresh": "રિફ્રેશ કરવા ટાંકો",
+  "aiGreeting": "નમસ્તે! હું અધિકાર AI છું. સરકારી યોજનાઓ વિશે કંઈ પણ પૂછો.",
+  "askScheme": "કોઈપણ યોજના વિશે પૂછો...",
+  "profileReview": "પ્રોફાઇલ સમીક્ષા",
+  "noProfileData": "પ્રોફાઇલ મળી નથી. કૃપા કરીને પાછા જાઓ અને ફરી બોલો.",
+  "discover": "શોધો",
+  "schemes": "યોજનાઓ",
+  "aiChat": "AI ચેટ",
+  "history": "ઇતિહાસ"
 }

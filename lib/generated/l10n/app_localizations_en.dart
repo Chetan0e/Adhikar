@@ -407,4 +407,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'Pull to refresh';
+
+  @override
+  String get aiGreeting =>
+      'Hello! I am Adhikar AI. Ask me anything about government schemes.';
+
+  @override
+  String get askScheme => 'Ask about any scheme...';
+
+  @override
+  String get profileReview => 'Profile Review';
+
+  @override
+  String get noProfileData =>
+      'No profile found. Please go back and speak again.';
+
+  @override
+  String get discover => 'Discover';
+
+  @override
+  String get schemes => 'Schemes';
+
+  @override
+  String get aiChat => 'AI Chat';
+
+  @override
+  String get history => 'History';
 }

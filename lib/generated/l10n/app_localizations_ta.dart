@@ -414,4 +414,30 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get pullToRefresh => 'புதுப்பிக்க இழுக்கவும்';
+
+  @override
+  String get aiGreeting =>
+      'வணக்கம்! நான் அதிகார் AI. அரசு திட்டங்களைப் பற்றி எதையும் கேளுங்கள்.';
+
+  @override
+  String get askScheme => 'எந்த திட்டத்தைப் பற்றியும் கேளுங்கள்...';
+
+  @override
+  String get profileReview => 'சுயவிவர மதிப்பாய்வு';
+
+  @override
+  String get noProfileData =>
+      'சுயவிவரம் கிடைக்கவில்லை. தயவுசெய்து திரும்பி பேசுங்கள்.';
+
+  @override
+  String get discover => 'கண்டறியுங்கள்';
+
+  @override
+  String get schemes => 'திட்டங்கள்';
+
+  @override
+  String get aiChat => 'AI அரட்டை';
+
+  @override
+  String get history => 'வரலாறு';
 }

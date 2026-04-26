@@ -871,6 +871,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pull to refresh'**
   String get pullToRefresh;
+
+  /// No description provided for @aiGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! I am Adhikar AI. Ask me anything about government schemes.'**
+  String get aiGreeting;
+
+  /// No description provided for @askScheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about any scheme...'**
+  String get askScheme;
+
+  /// No description provided for @profileReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Review'**
+  String get profileReview;
+
+  /// No description provided for @noProfileData.
+  ///
+  /// In en, this message translates to:
+  /// **'No profile found. Please go back and speak again.'**
+  String get noProfileData;
+
+  /// No description provided for @discover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discover;
+
+  /// No description provided for @schemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Schemes'**
+  String get schemes;
+
+  /// No description provided for @aiChat.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Chat'**
+  String get aiChat;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
 }
 
 class _AppLocalizationsDelegate

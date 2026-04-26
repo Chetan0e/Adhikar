@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/scheme_categories.dart';
+import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../data/models/scheme.dart';
 
 class SchemeDetailScreen extends StatelessWidget {
@@ -14,6 +16,8 @@ class SchemeDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langCode = context.read<LanguageCubit>().currentLanguageCode;
+    
     if (schemeData == null) {
       return const Scaffold(
         body: Center(child: Text('No scheme data')),
@@ -27,6 +31,8 @@ class SchemeDetailScreen extends StatelessWidget {
     final confidence = (matchData['confidence'] as num).toDouble();
     final reasons = List<String>.from(matchData['reasons'] as List);
     final missingDocuments = List<String>.from(matchData['missingDocuments'] as List);
+    final displayName = scheme.nameForLocale(langCode);
+    final displayDescription = scheme.descriptionForLocale(langCode);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -39,7 +45,7 @@ class SchemeDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Card
-            _buildHeaderCard(scheme).animate().fadeIn(duration: 400.ms),
+            _buildHeaderCard(scheme, displayName).animate().fadeIn(duration: 400.ms),
 
             const SizedBox(height: 16),
 
@@ -49,7 +55,7 @@ class SchemeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Description Card
-            _buildInfoCard(context, 'Description', scheme.description).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+            _buildInfoCard(context, 'Description', displayDescription).animate().fadeIn(delay: 300.ms, duration: 400.ms),
 
             const SizedBox(height: 16),
 
@@ -65,11 +71,11 @@ class SchemeDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context, scheme).animate().slide(begin: const Offset(0, 1), duration: 400.ms),
+      bottomNavigationBar: _buildBottomBar(context, scheme, displayName).animate().slide(begin: const Offset(0, 1), duration: 400.ms),
     );
   }
 
-  Widget _buildHeaderCard(Scheme scheme) {
+  Widget _buildHeaderCard(Scheme scheme, String displayName) {
     final categoryColor = _getCategoryColor(scheme.category);
 
     return Container(
@@ -105,23 +111,13 @@ class SchemeDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           // Scheme Name
           Text(
-            scheme.name,
+            displayName,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColors.accentWhite,
             ),
           ),
-          const SizedBox(height: 8),
-          // Hindi Name
-          if (scheme.nameHindi.isNotEmpty)
-            Text(
-              scheme.nameHindi,
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.accentWhite.withOpacity(0.9),
-              ),
-            ),
           const SizedBox(height: 16),
           // Benefit Amount
           Row(
@@ -353,7 +349,7 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, Scheme scheme) {
+  Widget _buildBottomBar(BuildContext context, Scheme scheme, String displayName) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -376,7 +372,7 @@ class SchemeDetailScreen extends StatelessWidget {
                 // Share button
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _shareScheme(scheme),
+                    onPressed: () => _shareScheme(scheme, displayName),
                     icon: const Icon(Icons.share, size: 16),
                     label: const Text('Share'),
                   ),
@@ -419,13 +415,13 @@ class SchemeDetailScreen extends StatelessWidget {
     );
   }
 
-  void _shareScheme(Scheme scheme) {
-    final text = '${scheme.name}\n'
+  void _shareScheme(Scheme scheme, String displayName) {
+    final text = '$displayName\n'
         'Benefit: ${scheme.benefitAmount}\n'
         'Eligibility: ${scheme.eligibility}\n'
         'Apply at: ${scheme.applicationUrl.isNotEmpty ? scheme.applicationUrl : scheme.applicationOffice}\n\n'
         'Found using Adhikar app';
-    Share.share(text, subject: scheme.name);
+    Share.share(text, subject: displayName);
   }
 
   Color _getCategoryColor(String category) {
