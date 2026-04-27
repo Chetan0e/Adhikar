@@ -20,6 +20,14 @@ void main() async {
     debugPrint('App will run without environment variables. Use --dart-define for API keys.');
   }
 
+  // Debug: Check API key injection
+  final apiKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+  debugPrint('╔══ GEMINI API KEY CHECK ══╗');
+  debugPrint('║ Key present: ${apiKey.isNotEmpty}');
+  debugPrint('║ Key length: ${apiKey.length}');
+  debugPrint('║ First 5 chars: ${apiKey.isNotEmpty ? apiKey.substring(0, 5) : "N/A"}');
+  debugPrint('╚═══════════════════════════╝');
+
   // Initialize Firebase
   try {
     await Firebase.initializeApp();
@@ -43,8 +51,8 @@ void main() async {
   final languageCubit = LanguageCubit();
   await languageCubit.loadSavedLanguage();
 
-  // Debug Firestore and seed schemes if needed
-  await debugFirestore();
+  // Debug Firestore (commented out to prevent dummy data seeding)
+  // await debugFirestore();
 
   runApp(
     BlocProvider<LanguageCubit>.value(

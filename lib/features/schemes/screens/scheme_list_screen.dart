@@ -13,6 +13,7 @@ import '../../../../data/models/scheme.dart';
 import '../../../../data/models/user_profile.dart';
 import '../../../../data/local/schemes_database.dart';
 import '../../../../core/utils/eligibility_engine.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class SchemeListScreen extends StatefulWidget {
   const SchemeListScreen({super.key});
@@ -117,7 +118,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
       final schemesData = SchemesDatabase.getAllSchemes();
       print('[SchemeList] Found ${schemesData.length} schemes in database');
       final schemes = schemesData.map((data) => Scheme.fromJson(data)).toList();
-      
+
       // Create SchemeMatch objects with default confidence
       _matchedSchemes = schemes.map((scheme) => SchemeMatch(
         scheme: scheme,
@@ -126,9 +127,17 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
         missingDocuments: [],
         estimatedBenefit: scheme.benefitAmount,
       )).toList();
-      
+
       _filteredSchemes = List.from(_matchedSchemes);
       print('[SchemeList] Loaded ${_matchedSchemes.length} schemes');
+
+      // Log category breakdown
+      final categories = <String, int>{};
+      for (final match in _matchedSchemes) {
+        final cat = match.scheme.category;
+        categories[cat] = (categories[cat] ?? 0) + 1;
+      }
+      print('[SchemeList] Category breakdown: $categories');
     } catch (e) {
       print('[SchemeList] Error loading schemes from local database: $e');
       _matchedSchemes = [];
@@ -175,7 +184,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
     final langCode = context.read<LanguageCubit>().currentLanguageCode;
     _filteredSchemes = _matchedSchemes.where((match) {
       final categoryMatch =
-          _selectedCategory == 'All' || match.scheme.category == _selectedCategory;
+          _selectedCategory.toLowerCase() == 'all' || match.scheme.category.toLowerCase() == _selectedCategory.toLowerCase();
       final name = match.scheme.nameForLocale(langCode);
       final description = match.scheme.descriptionForLocale(langCode);
       final searchMatch = _searchQuery.isEmpty ||
@@ -233,6 +242,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
 
   Widget _buildHeader() {
     final hasProfile = _profile != null;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
@@ -242,7 +252,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hasProfile ? 'Your Eligible Schemes' : 'All Schemes',
+                  hasProfile ? l10n.eligibleSchemes : l10n.allSchemes,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -250,7 +260,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
                 ),
                 if (hasProfile && _profile!.name.isNotEmpty)
                   Text(
-                    'For ${_profile!.name}',
+                    '${l10n.forUser} ${_profile!.name}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -261,7 +271,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
           // TTS replay button
           IconButton(
             icon: const Icon(Icons.volume_up, color: AppColors.primary),
-            tooltip: 'Hear results',
+            tooltip: l10n.hearResults,
             onPressed: () async {
               if (_profile != null) {
                 final langCode = context.read<LanguageCubit>().currentLanguageCode;
@@ -320,6 +330,8 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   }
 
   Widget _buildCategoryFilter() {
+    final l10n = AppLocalizations.of(context);
+    final langCode = context.read<LanguageCubit>().currentLanguageCode;
     return SizedBox(
       height: 52,
       child: ListView.builder(
@@ -330,8 +342,8 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
           final cat = _categories[index];
           final isSelected = _selectedCategory == cat;
           final label = cat == 'All'
-              ? 'All'
-              : SchemeCategories.categoryNames[cat] ?? cat;
+              ? l10n!.categoryAll
+              : SchemeCategories.getLocalizedCategoryName(cat, langCode);
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
@@ -357,6 +369,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
 
   Widget _buildResultsSummary() {
     if (_isLoading || _matchedSchemes.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     final total = _filteredSchemes.fold<double>(
       0,
@@ -378,13 +391,13 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
         children: [
           _SummaryPill(
             icon: Icons.check_circle,
-            label: '${_filteredSchemes.length} Eligible',
+            label: '${_filteredSchemes.length} ${l10n.eligible}',
           ),
           const SizedBox(width: 16),
           const Spacer(),
           _SummaryPill(
             icon: Icons.currency_rupee,
-            label: '₹${(total / 1000).toStringAsFixed(0)}K Benefits',
+            label: '₹${(total / 1000).toStringAsFixed(0)}K ${l10n.benefits}',
           ),
         ],
       ),
@@ -392,6 +405,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   }
 
   Widget _buildSchemeList() {
+    final l10n = AppLocalizations.of(context);
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -405,8 +419,8 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
             const SizedBox(height: 12),
             Text(
               _searchQuery.isNotEmpty
-                  ? 'No schemes match "$_searchQuery"'
-                  : 'No schemes in this category',
+                  ? '${l10n.noSchemesMatch} "$_searchQuery"'
+                  : l10n.noSchemesInCategory,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: AppColors.textSecondary,
               ),

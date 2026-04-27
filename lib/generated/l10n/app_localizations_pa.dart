@@ -113,7 +113,8 @@ class AppLocalizationsPa extends AppLocalizations {
   String get noSchemesFound => 'ਕੋਈ ਯੋਜਨਾ ਨਹੀਂ';
 
   @override
-  String get tryUpdatingProfile => 'ਪ੍ਰੋਫਾਈਲ ਅਪਡੇਟ ਕਰੋ';
+  String get tryUpdatingProfile =>
+      'ਯੋਗ ਯੋਜਨਾਵਾਂ ਵੇਖਣ ਲਈ ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਅਪਡੇਟ ਕਰੋ';
 
   @override
   String get applyNow => 'ਹੁਣ ਅਰਜ਼ੀ';
@@ -176,7 +177,28 @@ class AppLocalizationsPa extends AppLocalizations {
   String get applicationHistory => 'ਇਤਿਹਾਸ';
 
   @override
-  String get noApplications => 'ਕੋਈ ਅਰਜ਼ੀ ਨਹੀਂ!';
+  String get noApplications => 'ਕੋਈ ਅਰਜ਼ੀ ਨਹੀਂ';
+
+  @override
+  String get allSchemes => 'ਸਾਰੀਆਂ ਯੋਜਨਾਵਾਂ';
+
+  @override
+  String get forUser => 'ਲਈ';
+
+  @override
+  String get hearResults => 'ਨਤੀਜੇ ਸੁਣੋ';
+
+  @override
+  String get eligible => 'ਯੋਗ';
+
+  @override
+  String get benefits => 'ਲਾਭ';
+
+  @override
+  String get noSchemesMatch => 'ਕੋਈ ਯੋਜਨਾ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ';
+
+  @override
+  String get noSchemesInCategory => 'ਇਸ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਕੋਈ ਯੋਜਨਾ ਨਹੀਂ';
 
   @override
   String get statusSubmitted => 'ਜਮ੍ਹਾ';
@@ -427,4 +449,144 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get history => 'ਇਤਿਹਾਸ';
+
+  @override
+  String get personalInfo => 'ਨਿੱਜੀ ਜਾਣਕਾਰੀ';
+
+  @override
+  String get economicInfo => 'ਆਰਥਿਕ ਜਾਣਕਾਰੀ';
+
+  @override
+  String get socialStatus => 'ਸਮਾਜਿਕ ਸਥਿਤੀ';
+
+  @override
+  String get fieldName => 'ਨਾਮ';
+
+  @override
+  String get fieldAge => 'ਉਮਰ';
+
+  @override
+  String get fieldGender => 'ਲਿੰਗ';
+
+  @override
+  String get fieldState => 'ਰਾਜ';
+
+  @override
+  String get fieldDistrict => 'ਜ਼ਿਲ੍ਹਾ';
+
+  @override
+  String get fieldCaste => 'ਜਾਤ';
+
+  @override
+  String get fieldOccupation => 'ਕਿੱਤਾ';
+
+  @override
+  String get fieldAnnualIncome => 'ਸਾਲਾਨਾ ਆਮਦਨ (₹)';
+
+  @override
+  String get fieldLandHolding => 'ਜ਼ਮੀਨ (ਏਕੜ)';
+
+  @override
+  String get fieldFamilySize => 'ਪਰਿਵਾਰ ਦਾ ਆਕਾਰ';
+
+  @override
+  String get fieldBplCard => 'BPL ਕਾਰਡ';
+
+  @override
+  String get fieldAadhaar => 'ਆਧਾਰ ਕਾਰਡ';
+
+  @override
+  String get fieldBankAccount => 'ਬੈਂਕ ਖਾਤਾ';
+
+  @override
+  String get fieldWidow => 'ਵਿਧਵਾ';
+
+  @override
+  String get fieldDisabled => 'ਅਪੰਗ';
+
+  @override
+  String get fieldPregnant => 'ਗਰਭਵਤੀ';
+
+  @override
+  String get fieldEducation => 'ਸਿੱਖਿਆ';
+
+  @override
+  String get findEligibleSchemes => 'ਯੋਗ ਯੋਜਨਾਵਾਂ ਲੱਭੋ';
+
+  @override
+  String get notDetected => 'ਨਹੀਂ ਪਤਾ ਲੱਗਾ';
+
+  @override
+  String get members => 'ਮੈਂਬਰ';
+
+  @override
+  String get acres => 'ਏਕੜ';
+
+  @override
+  String get genderMale => 'ਪੁਰਸ਼';
+
+  @override
+  String get genderFemale => 'ਮਹਿਲਾ';
+
+  @override
+  String get occupationFarmer => 'ਕਿਸਾਨ';
+
+  @override
+  String get occupationStudent => 'ਵਿਦਿਆਰਥੀ';
+
+  @override
+  String get occupationDailyWage => 'ਰੋਜ਼ਾਨਾ ਮਜ਼ਦੂਰ';
+
+  @override
+  String get occupationBusiness => 'ਕਾਰੋਬਾਰ';
+
+  @override
+  String get occupationGovernment => 'ਸਰਕਾਰੀ';
+
+  @override
+  String get occupationUnemployed => 'ਬੇਰੁਜ਼ਗਾਰ';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

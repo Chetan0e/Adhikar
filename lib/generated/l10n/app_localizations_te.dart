@@ -108,7 +108,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get totalEstimatedBenefits => 'మొత్తం అంచనా ప్రయోజనాలు';
 
   @override
-  String get eligibleSchemes => 'అర్హత పొందిన పథకాలు';
+  String get eligibleSchemes => 'అర్హమైన పథకాలు';
 
   @override
   String get noSchemesFound => 'ఏ పథకాలూ కనుగొనబడలేదు';
@@ -175,10 +175,31 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
-  String get applicationHistory => 'దరఖాస్తు చరిత్ర';
+  String get applicationHistory => 'అప్లికేషన్ చరిత్ర';
 
   @override
-  String get noApplications => 'ఇంకా దరఖాస్తులు లేవు. ఇప్పుడే కనుగొనండి!';
+  String get noApplications => 'అప్లికేషన్లు లేవు';
+
+  @override
+  String get allSchemes => 'అన్ని పథకాలు';
+
+  @override
+  String get forUser => 'కోసం';
+
+  @override
+  String get hearResults => 'ఫలితాలను వినండి';
+
+  @override
+  String get eligible => 'అర్హత';
+
+  @override
+  String get benefits => 'ప్రయోజనలు';
+
+  @override
+  String get noSchemesMatch => 'సరిపోలే పథకాలు లేవు';
+
+  @override
+  String get noSchemesInCategory => 'ఈ వర్గంలో పథకాలు లేవు';
 
   @override
   String get statusSubmitted => 'సమర్పించబడింది';
@@ -210,34 +231,34 @@ class AppLocalizationsTe extends AppLocalizations {
   String get settings => 'సెట్టింగ్‌లు';
 
   @override
-  String get language => 'భాష';
+  String get language => 'Language';
 
   @override
-  String get currentLanguage => 'ప్రస్తుత';
+  String get currentLanguage => 'Current';
 
   @override
-  String get voiceAndSound => 'వాయిస్ మరియు సౌండ్';
+  String get voiceAndSound => 'Voice & Sound';
 
   @override
-  String get enableTTS => 'TTS నేరేషన్ ఎనేబుల్ చేయండి';
+  String get enableTTS => 'Enable TTS Narration';
 
   @override
-  String get autoPlayResults => 'ఫలితాలను ఆటోప్లే చేయండి';
+  String get autoPlayResults => 'Auto-play Results';
 
   @override
-  String get speechSpeed => 'మాట్లాడే వేగం';
+  String get speechSpeed => 'Speech Speed';
 
   @override
-  String get slow => 'నెమ్మదిగా';
+  String get slow => 'Slow';
 
   @override
-  String get normal => 'సాధారణ';
+  String get normal => 'Normal';
 
   @override
-  String get fast => 'వేగంగా';
+  String get fast => 'Fast';
 
   @override
-  String get notifications => 'నోటిఫికేషన్‌లు';
+  String get notifications => 'Notifications';
 
   @override
   String get statusAlerts => 'దరఖాస్తు స్థితి హెచ్చరికలు';
@@ -437,4 +458,144 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get history => 'చరిత్ర';
+
+  @override
+  String get personalInfo => 'వ్యక్తిగత సమాచారం';
+
+  @override
+  String get economicInfo => 'ఆర్థిక సమాచారం';
+
+  @override
+  String get socialStatus => 'సామాజిక స్థితి';
+
+  @override
+  String get fieldName => 'పేరు';
+
+  @override
+  String get fieldAge => 'వయస్సు';
+
+  @override
+  String get fieldGender => 'లింగం';
+
+  @override
+  String get fieldState => 'రాష్ట్రం';
+
+  @override
+  String get fieldDistrict => 'జిల్లా';
+
+  @override
+  String get fieldCaste => 'కులం';
+
+  @override
+  String get fieldOccupation => 'వృత్తి';
+
+  @override
+  String get fieldAnnualIncome => 'వార్షిక ఆదాయం (₹)';
+
+  @override
+  String get fieldLandHolding => 'భూమి (ఎకరాలు)';
+
+  @override
+  String get fieldFamilySize => 'కుటుంబ పరిమాణం';
+
+  @override
+  String get fieldBplCard => 'BPL కార్డు';
+
+  @override
+  String get fieldAadhaar => 'ఆధార్ కార్డు';
+
+  @override
+  String get fieldBankAccount => 'బ్యాంక్ ఖాతా';
+
+  @override
+  String get fieldWidow => 'వితంతువు';
+
+  @override
+  String get fieldDisabled => 'వికలాంగులు';
+
+  @override
+  String get fieldPregnant => 'గర్భవతి';
+
+  @override
+  String get fieldEducation => 'విద్య';
+
+  @override
+  String get findEligibleSchemes => 'అర్హమైన పథకాలను కనుగొనండి';
+
+  @override
+  String get notDetected => 'కనుగొనబడలేదు';
+
+  @override
+  String get members => 'సభ్యులు';
+
+  @override
+  String get acres => 'ఎకరాలు';
+
+  @override
+  String get genderMale => 'పురుషుడు';
+
+  @override
+  String get genderFemale => 'స్త్రీ';
+
+  @override
+  String get occupationFarmer => 'రైతు';
+
+  @override
+  String get occupationStudent => 'విద్యార్థి';
+
+  @override
+  String get occupationDailyWage => 'రోజువారీ కూలీ';
+
+  @override
+  String get occupationBusiness => 'వ్యాపారం';
+
+  @override
+  String get occupationGovernment => 'ప్రభుత్వం';
+
+  @override
+  String get occupationUnemployed => 'నిరుద్యోగం';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

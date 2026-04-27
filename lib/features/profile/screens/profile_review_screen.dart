@@ -25,6 +25,8 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
   String _transcript = '';
   String? _aiError;
 
+  AppLocalizations get l => AppLocalizations.of(context)!;
+
   // Controllers for editing
   late TextEditingController _nameController;
   late TextEditingController _ageController;
@@ -64,42 +66,62 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
   }
 
   Future<void> _loadProfile() async {
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    if (args == null) {
-      if (mounted) setState(() => _isLoading = false);
-      return;
+    print('ProfileReviewScreen _loadProfile called');
+    
+    // Get from route arguments
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    print('Route args: $routeArgs');
+    
+    Map<String, dynamic>? data;
+    
+    if (routeArgs != null) {
+      // Check if it's the old format {transcript, profileData} or new format (direct profile)
+      if (routeArgs.containsKey('profileData')) {
+        data = routeArgs['profileData'] as Map<String, dynamic>?;
+        _transcript = routeArgs['transcript'] as String? ?? '';
+      } else {
+        // New format: direct profile data
+        data = routeArgs;
+        _transcript = data['_raw_transcript'] as String? ?? '';
+      }
+      
+      // Check if it's a fallback profile
+      if (data != null && data['_is_fallback'] == true) {
+        _aiError = 'AI could not extract all details automatically. Please fill in the missing fields below.';
+      }
     }
-
-    _transcript = args['transcript'] as String? ?? '';
-    final profileData = args['profileData'] as Map<String, dynamic>?;
-
-    // If profile data is already provided, use it directly
-    if (profileData != null) {
-      _profile = UserProfile.fromJson(profileData);
+    
+    print('Profile data received: $data');
+    print('Transcript: $_transcript');
+    
+    if (data != null && data.isNotEmpty) {
+      print('Creating UserProfile from data');
+      _profile = UserProfile.fromJson(data);
       _populateControllers();
       if (mounted) setState(() => _isLoading = false);
       return;
     }
 
-    // Otherwise, extract from transcript
+    // Fallback to empty profile with transcript
     if (_transcript.isNotEmpty) {
-      // Build language-aware Gemini prompt
+      print('No profile data, extracting from transcript');
       final langCode = context.read<LanguageCubit>().currentLanguageCode;
       final langInstruction = SupportedLanguages.geminiLanguageInstruction(langCode);
 
       try {
-        final extractedData =
-            await _geminiService.extractProfile(_transcript, languageHint: langInstruction);
+        final extractedData = await _geminiService.extractProfile(_transcript);
         if (mounted) {
           _profile = UserProfile.fromJson(extractedData);
         }
       } catch (e) {
+        print('Extraction error: $e');
         if (mounted) {
           _aiError = 'Could not auto-extract. Please fill manually.';
           _profile = _buildEmptyProfile();
         }
       }
     } else {
+      print('No transcript, building empty profile');
       _profile = _buildEmptyProfile();
     }
 
@@ -247,17 +269,17 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
 
                         // Personal Info
                         _buildSection(
-                          title: '👤  Personal Information',
+                          title: '👤  ${l.personalInfo}',
                           delay: 200,
                           children: [
-                            _buildEditableField('Name', _nameController, 'full name'),
-                            _buildEditableField('Age', _ageController, 'years',
+                            _buildEditableField(l.fieldName, _nameController, 'full name'),
+                            _buildEditableField(l.fieldAge, _ageController, 'years',
                                 keyboardType: TextInputType.number),
-                            _buildReadOnlyRow('Gender',
-                                _profile!.gender.isEmpty ? 'Not detected' : _profile!.gender),
-                            _buildEditableField('State', _stateController, 'e.g. Maharashtra'),
-                            _buildEditableField('District', _districtController, 'e.g. Pune'),
-                            _buildEditableField('Caste', _castController, 'e.g. OBC / SC / ST'),
+                            _buildReadOnlyRow(l.fieldGender,
+                                _profile!.gender.isEmpty ? l.notDetected : _localizeGender(_profile!.gender, l)),
+                            _buildEditableField(l.fieldState, _stateController, 'e.g. Maharashtra'),
+                            _buildEditableField(l.fieldDistrict, _districtController, 'e.g. Pune'),
+                            _buildEditableField(l.fieldCaste, _castController, 'e.g. OBC / SC / ST'),
                           ],
                         ),
 
@@ -265,17 +287,17 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
 
                         // Economic Info
                         _buildSection(
-                          title: '💰  Economic Information',
+                          title: '💰  ${l.economicInfo}',
                           delay: 300,
                           children: [
-                            _buildEditableField('Occupation', _occupationController,
+                            _buildEditableField(l.fieldOccupation, _occupationController,
                                 'e.g. farmer, labourer'),
-                            _buildEditableField('Annual Income (₹)', _incomeController,
+                            _buildEditableField(l.fieldAnnualIncome, _incomeController,
                                 '0', keyboardType: TextInputType.number),
-                            _buildReadOnlyRow('Land Holding',
-                                '${_profile!.landHolding} acres'),
-                            _buildReadOnlyRow('Family Size',
-                                '${_profile!.familySize} members'),
+                            _buildReadOnlyRow(l.fieldLandHolding,
+                                '${_profile!.landHolding} ${l.acres}'),
+                            _buildReadOnlyRow(l.fieldFamilySize,
+                                '${_profile!.familySize} ${l.members}'),
                           ],
                         ),
 
@@ -283,7 +305,7 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
 
                         // Social Status (toggleable chips)
                         _buildSection(
-                          title: '🏷️  Social Status',
+                          title: '🏷️  ${l.socialStatus}',
                           delay: 400,
                           children: [
                             _buildToggleGrid(),
@@ -317,7 +339,7 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
                                 ),
                               );
                             },
-                            child: const Text('Something wrong? Edit profile'),
+                            child: Text(l.editProfile),
                           ),
                         ),
                       ],
@@ -535,13 +557,14 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
   }
 
   Widget _buildToggleGrid() {
+    final l = AppLocalizations.of(context)!;
     final toggles = [
-      {'label': 'BPL Card', 'field': 'bpl', 'value': _profile!.hasBPLCard},
-      {'label': 'Aadhaar', 'field': 'aadhar', 'value': _profile!.hasAadhar},
-      {'label': 'Bank Account', 'field': 'bank', 'value': _profile!.hasBankAccount},
-      {'label': 'Widow', 'field': 'widow', 'value': _profile!.isWidow},
-      {'label': 'Disabled', 'field': 'disabled', 'value': _profile!.isDisabled},
-      {'label': 'Pregnant', 'field': 'pregnant', 'value': _profile!.isPregnant},
+      {'label': l.fieldBplCard, 'field': 'bpl', 'value': _profile!.hasBPLCard},
+      {'label': l.fieldAadhaar, 'field': 'aadhar', 'value': _profile!.hasAadhar},
+      {'label': l.fieldBankAccount, 'field': 'bank', 'value': _profile!.hasBankAccount},
+      {'label': l.fieldWidow, 'field': 'widow', 'value': _profile!.isWidow},
+      {'label': l.fieldDisabled, 'field': 'disabled', 'value': _profile!.isDisabled},
+      {'label': l.fieldPregnant, 'field': 'pregnant', 'value': _profile!.isPregnant},
     ];
 
     return Wrap(
@@ -587,5 +610,25 @@ class _ProfileReviewScreenState extends State<ProfileReviewScreen> {
         );
       }).toList(),
     );
+  }
+
+  String _localizeGender(String? gender, AppLocalizations l) {
+    return switch(gender) {
+      'male' => l.genderMale,
+      'female' => l.genderFemale,
+      _ => l.notDetected,
+    };
+  }
+
+  String _localizeOccupation(String? occ, AppLocalizations l) {
+    return switch(occ) {
+      'farmer' => l.occupationFarmer,
+      'student' => l.occupationStudent,
+      'daily_wage' => l.occupationDailyWage,
+      'business' => l.occupationBusiness,
+      'government' => l.occupationGovernment,
+      'unemployed' => l.occupationUnemployed,
+      _ => l.notDetected,
+    };
   }
 }

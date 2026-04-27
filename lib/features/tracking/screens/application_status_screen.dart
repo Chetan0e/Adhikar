@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../../../core/constants/hive_boxes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/application.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class ApplicationStatusScreen extends StatefulWidget {
   const ApplicationStatusScreen({super.key});
@@ -11,60 +14,65 @@ class ApplicationStatusScreen extends StatefulWidget {
 }
 
 class _ApplicationStatusScreenState extends State<ApplicationStatusScreen> {
-  // Mock data - in real app, this would come from Firebase
-  final List<Application> _applications = [
-    Application(
-      id: 'APP001',
-      schemeId: 'AG001',
-      userId: 'USER001',
-      status: ApplicationStatus.submitted,
-      filledFormData: {
-        'applicant_name': 'Sunita Devi',
-        'mobile': '9876543210',
-      },
-      uploadedDocumentUrls: ['doc1.pdf', 'doc2.pdf'],
-      appliedAt: DateTime.now().subtract(const Duration(days: 5)),
-      referenceNumber: 'REF20260012345',
-    ),
-    Application(
-      id: 'APP002',
-      schemeId: 'WC003',
-      userId: 'USER001',
-      status: ApplicationStatus.under_review,
-      filledFormData: {
-        'applicant_name': 'Sunita Devi',
-        'mobile': '9876543210',
-      },
-      uploadedDocumentUrls: ['doc3.pdf'],
-      appliedAt: DateTime.now().subtract(const Duration(days: 15)),
-      referenceNumber: 'REF20260012346',
-    ),
-  ];
+  final List<Application> _applications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadApplications();
+  }
+
+  Future<void> _loadApplications() async {
+    try {
+      final box = await Hive.openBox(HiveBoxes.kApplicationsBox);
+      final applicationsData = box.values.toList();
+      
+      setState(() {
+        _applications.clear();
+        for (final data in applicationsData) {
+          if (data is Map<String, dynamic>) {
+            _applications.add(Application.fromJson(data));
+          }
+        }
+        _isLoading = false;
+      });
+      
+      print('[ApplicationStatus] Loaded ${_applications.length} applications');
+    } catch (e) {
+      print('[ApplicationStatus] Error loading applications: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('My Applications'),
+        title: Text(l10n.applicationHistory),
         elevation: 0,
       ),
-      body: _applications.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _applications.length,
-              itemBuilder: (context, index) {
-                return _ApplicationCard(
-                  application: _applications[index],
-                  delay: index * 100,
-                );
-              },
-            ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _applications.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _applications.length,
+                  itemBuilder: (context, index) {
+                    return _ApplicationCard(
+                      application: _applications[index],
+                      delay: index * 100,
+                    );
+                  },
+                ),
     );
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -76,12 +84,12 @@ class _ApplicationStatusScreenState extends State<ApplicationStatusScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No Applications Yet',
+            l10n.noApplications,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            'Apply for schemes to track them here',
+            l10n.tryUpdatingProfile,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),

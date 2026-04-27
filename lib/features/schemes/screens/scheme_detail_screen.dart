@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/scheme_categories.dart';
 import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../data/models/scheme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class SchemeDetailScreen extends StatelessWidget {
   final Map<String, dynamic>? schemeData;
@@ -55,7 +56,7 @@ class SchemeDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Description Card
-            _buildInfoCard(context, 'Description', displayDescription).animate().fadeIn(delay: 300.ms, duration: 400.ms),
+            _buildInfoCard(context, AppLocalizations.of(context)!.description, displayDescription).animate().fadeIn(delay: 300.ms, duration: 400.ms),
 
             const SizedBox(height: 16),
 
@@ -140,6 +141,7 @@ class SchemeDetailScreen extends StatelessWidget {
   }
 
   Widget _buildConfidenceCard(BuildContext context, double confidence, List<String> reasons) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
@@ -155,7 +157,7 @@ class SchemeDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Eligibility Score',
+                l10n.eligibilityScore,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppColors.primary,
                 ),
@@ -193,7 +195,7 @@ class SchemeDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           // Reasons
           Text(
-            'Why Eligible:',
+            l10n.whyEligible,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -260,7 +262,7 @@ class SchemeDetailScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Required Documents',
+            AppLocalizations.of(context)!.requiredDocuments,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: AppColors.primary,
             ),
@@ -303,21 +305,21 @@ class SchemeDetailScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Application Information',
+            AppLocalizations.of(context)!.applicationInfo,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 12),
-          _buildInfoRow(context, 'Ministry', scheme.ministry),
+          _buildInfoRow(context, AppLocalizations.of(context)!.fieldMinistry ?? 'Ministry', scheme.ministry),
           const SizedBox(height: 8),
-          _buildInfoRow(context, 'Apply At', scheme.applicationOffice),
+          _buildInfoRow(context, AppLocalizations.of(context)!.applyAt ?? 'Apply At', scheme.applicationOffice),
           const SizedBox(height: 16),
           if (scheme.applicationUrl.isNotEmpty)
             OutlinedButton.icon(
               onPressed: () => _launchUrl(scheme.applicationUrl),
               icon: const Icon(Icons.open_in_new, size: 18),
-              label: const Text('Visit Official Website'),
+              label: Text(AppLocalizations.of(context)!.visitOfficialWebsite ?? 'Visit Official Website'),
             ),
         ],
       ),
@@ -374,7 +376,7 @@ class SchemeDetailScreen extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _shareScheme(scheme, displayName),
                     icon: const Icon(Icons.share, size: 16),
-                    label: const Text('Share'),
+                    label: Text(AppLocalizations.of(context)!.share),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -389,7 +391,7 @@ class SchemeDetailScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.checklist, size: 16),
-                    label: const Text('Documents'),
+                    label: Text(AppLocalizations.of(context)!.documentsYouNeed),
                   ),
                 ),
               ],
@@ -406,7 +408,7 @@ class SchemeDetailScreen extends StatelessWidget {
                     arguments: schemeData,
                   );
                 },
-                child: const Text('Apply Now'),
+                child: Text(AppLocalizations.of(context)!.applyNow),
               ),
             ),
           ],
@@ -435,6 +437,7 @@ class SchemeDetailScreen extends StatelessWidget {
       case 'housing':
         return AppColors.housing;
       case 'women':
+      case 'women_child':
         return AppColors.women;
       case 'employment':
         return AppColors.employment;

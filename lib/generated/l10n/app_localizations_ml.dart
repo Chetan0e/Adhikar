@@ -114,7 +114,8 @@ class AppLocalizationsMl extends AppLocalizations {
   String get noSchemesFound => 'പദ്ധതികൾ കിട്ടിയില്ല';
 
   @override
-  String get tryUpdatingProfile => 'പ്രൊഫൈൽ അപ്‌ഡേറ്റ് ചെയ്യൂ';
+  String get tryUpdatingProfile =>
+      'അർഹമായ പദ്ധതികൾ കാണുന്നതിന് നിങ്ങളുടെ പ്രൊഫൈൽ അപ്‌ഡേറ്റ് ചെയ്യുക';
 
   @override
   String get applyNow => 'ഇപ്പോൾ അപേക്ഷിക്കൂ';
@@ -177,7 +178,28 @@ class AppLocalizationsMl extends AppLocalizations {
   String get applicationHistory => 'ചരിത്രം';
 
   @override
-  String get noApplications => 'അപേക്ഷ ഇല്ല!';
+  String get noApplications => 'അപേക്ഷ ഇല്ല';
+
+  @override
+  String get allSchemes => 'എല്ലാ പദ്ധതികളും';
+
+  @override
+  String get forUser => 'നു';
+
+  @override
+  String get hearResults => 'ഫലങ്ങൾ കേൾക്കുക';
+
+  @override
+  String get eligible => 'അർഹത';
+
+  @override
+  String get benefits => 'ആനുകൂല്യങ്ങൾ';
+
+  @override
+  String get noSchemesMatch => 'പൊരുത്തമുള്ള പദ്ധതികളില്ല';
+
+  @override
+  String get noSchemesInCategory => 'ഈ വിഭാഗത്തിൽ പദ്ധതികളില്ല';
 
   @override
   String get statusSubmitted => 'സമർപ്പിച്ചു';
@@ -429,4 +451,144 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get history => 'ചരിത്രം';
+
+  @override
+  String get personalInfo => 'വ്യക്തിഗത വിവരം';
+
+  @override
+  String get economicInfo => 'സാമ്പത്തിക വിവരം';
+
+  @override
+  String get socialStatus => 'സാമൂഹിക നില';
+
+  @override
+  String get fieldName => 'പേര്';
+
+  @override
+  String get fieldAge => 'വയസ്സ്';
+
+  @override
+  String get fieldGender => 'ലിംഗഭേദം';
+
+  @override
+  String get fieldState => 'സംസ്ഥാനം';
+
+  @override
+  String get fieldDistrict => 'ജില്ല';
+
+  @override
+  String get fieldCaste => 'ജാതി';
+
+  @override
+  String get fieldOccupation => 'തൊഴിൽ';
+
+  @override
+  String get fieldAnnualIncome => 'വാർഷിക വരുമാനം (₹)';
+
+  @override
+  String get fieldLandHolding => 'ഭൂമി (ഏക്കർ)';
+
+  @override
+  String get fieldFamilySize => 'കുടുംബ വലുപ്പം';
+
+  @override
+  String get fieldBplCard => 'BPL കാർഡ്';
+
+  @override
+  String get fieldAadhaar => 'ആധാർ കാർഡ്';
+
+  @override
+  String get fieldBankAccount => 'ബാങ്ക് അക്കൗണ്ട്';
+
+  @override
+  String get fieldWidow => 'വിധവ';
+
+  @override
+  String get fieldDisabled => 'വൈകല്യമുള്ളവർ';
+
+  @override
+  String get fieldPregnant => 'ഗർഭിണി';
+
+  @override
+  String get fieldEducation => 'വിദ്യാഭ്യാസം';
+
+  @override
+  String get findEligibleSchemes => 'യോഗ്യമായ പദ്ധതികൾ കണ്ടെത്തുക';
+
+  @override
+  String get notDetected => 'കണ്ടെത്തിയില്ല';
+
+  @override
+  String get members => 'അംഗങ്ങൾ';
+
+  @override
+  String get acres => 'ഏക്കർ';
+
+  @override
+  String get genderMale => 'പുരുഷൻ';
+
+  @override
+  String get genderFemale => 'സ്ത്രീ';
+
+  @override
+  String get occupationFarmer => 'കർഷകൻ';
+
+  @override
+  String get occupationStudent => 'വിദ്യാർത്ഥി';
+
+  @override
+  String get occupationDailyWage => 'ദിവസവേതന തൊഴിലാളി';
+
+  @override
+  String get occupationBusiness => 'ബിസിനസ്';
+
+  @override
+  String get occupationGovernment => 'സർക്കാർ';
+
+  @override
+  String get occupationUnemployed => 'തൊഴിലില്ലാത്തവർ';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

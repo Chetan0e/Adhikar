@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../app/router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Shows a checklist of documents needed for a scheme.
 /// User taps to check off documents they have.
@@ -51,7 +52,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Documents You Need'),
+        title: Text(AppLocalizations.of(context)!.documentsYouNeed),
         elevation: 0,
       ),
       body: Column(
@@ -99,11 +100,11 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Documents Ready',
+                AppLocalizations.of(context)!.documentsReadyTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
-                '$done / ${_documents.length}',
+                '$done ${AppLocalizations.of(context)!.of} ${_documents.length}',
                 style: TextStyle(
                   color: _allChecked ? AppColors.accentGreen : AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -159,7 +160,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '$_missingCount document(s) missing. Gather them before applying.',
+                        '$_missingCount ${AppLocalizations.of(context)!.documentsMissing}',
                         style: TextStyle(
                           color: AppColors.warning,
                           fontSize: 13,
@@ -176,12 +177,12 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                     child: OutlinedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Saved for later — check My Applications')),
+                          SnackBar(
+                              content: Text(AppLocalizations.of(context)!.documentsSaved)),
                         );
                         Navigator.pop(context);
                       },
-                      child: const Text('Save for Later'),
+                      child: Text(AppLocalizations.of(context)!.saveForLater),
                     ),
                   ),
                 if (!_allChecked) const SizedBox(width: 12),
@@ -201,7 +202,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                           : AppColors.primary,
                     ),
                     child: Text(
-                      _allChecked ? 'Apply Now ✓' : 'Apply Anyway',
+                      _allChecked ? AppLocalizations.of(context)!.applyNowButton : AppLocalizations.of(context)!.applyAnyway,
                     ),
                   ),
                 ),
@@ -246,7 +247,7 @@ class _DocumentItemState extends State<_DocumentItem> {
 
   @override
   Widget build(BuildContext context) {
-    final howTo = _howToGet[widget.document] ?? 'Visit your nearest government office with valid ID proof.';
+    final howTo = _howToGet[widget.document] ?? AppLocalizations.of(context)!.visitGovtOffice;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -309,7 +310,7 @@ class _DocumentItemState extends State<_DocumentItem> {
                         foregroundColor: AppColors.warning,
                       ),
                       child: Text(
-                        _expanded ? 'Close' : 'How?',
+                        _expanded ? AppLocalizations.of(context)!.close : AppLocalizations.of(context)!.howToGet,
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),

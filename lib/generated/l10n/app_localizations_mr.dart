@@ -115,10 +115,10 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get tryUpdatingProfile =>
-      'तुमची प्रोफाइल माहिती अपडेट करण्याचा प्रयत्न करा';
+      'पात्र योजना पाहण्यासाठी आपला प्रोफाइल अपडेट करा';
 
   @override
-  String get applyNow => 'आत्ता अर्ज करा';
+  String get applyNow => 'आता अर्ज करा';
 
   @override
   String get back => 'मागे';
@@ -130,7 +130,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get eligibilityScore => 'पात्रता गुण';
 
   @override
-  String get whyEligible => 'का पात्र आहात:';
+  String get whyEligible => 'पात्र कसे?';
 
   @override
   String get description => 'वर्णन';
@@ -139,7 +139,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get requiredDocuments => 'आवश्यक कागदपत्रे';
 
   @override
-  String get applicationInfo => 'अर्ज माहिती';
+  String get applicationInfo => 'अर्जाची माहिती';
 
   @override
   String get ministry => 'मंत्रालय';
@@ -148,7 +148,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get applyAt => 'येथे अर्ज करा';
 
   @override
-  String get visitOfficialWebsite => 'अधिकृत वेबसाइट पहा';
+  String get visitOfficialWebsite => 'अधिकृत वेबसाइट भेट द्या';
 
   @override
   String get documentsNeeded => 'आवश्यक कागदपत्रे';
@@ -160,7 +160,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get missingDocuments => 'कागदपत्रे नाहीत → नंतरसाठी जतन करा';
 
   @override
-  String get howToGet => 'हे कसे मिळवावे';
+  String get howToGet => 'कसे मिळवावे?';
 
   @override
   String get findNearestOffice => 'जवळचे कार्यालय शोधा';
@@ -175,10 +175,31 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get applicationHistory => 'अर्ज इतिहास';
+  String get applicationHistory => 'आवेदन इतिहास';
 
   @override
-  String get noApplications => 'अद्याप कोणताही अर्ज नाही. आता शोधा!';
+  String get noApplications => 'कोई आवेदन नाहीत';
+
+  @override
+  String get allSchemes => 'सर्व योजना';
+
+  @override
+  String get forUser => 'साठी';
+
+  @override
+  String get hearResults => 'निकाल ऐका';
+
+  @override
+  String get eligible => 'पात्र';
+
+  @override
+  String get benefits => 'फायदे';
+
+  @override
+  String get noSchemesMatch => 'कोणतीही योजना जुळत नाही';
+
+  @override
+  String get noSchemesInCategory => 'या श्रेणीत कोणतीही योजना नाही';
 
   @override
   String get statusSubmitted => 'सादर केले';
@@ -434,4 +455,143 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get history => 'इतिहास';
+
+  @override
+  String get personalInfo => 'वैयक्तिक माहिती';
+
+  @override
+  String get economicInfo => 'आर्थिक माहिती';
+
+  @override
+  String get socialStatus => 'सामाजिक स्थिती';
+
+  @override
+  String get fieldName => 'नाव';
+
+  @override
+  String get fieldAge => 'वय';
+
+  @override
+  String get fieldGender => 'लिंग';
+
+  @override
+  String get fieldState => 'राज्य';
+
+  @override
+  String get fieldDistrict => 'जिल्हा';
+
+  @override
+  String get fieldCaste => 'जात';
+
+  @override
+  String get fieldOccupation => 'व्यवसाय';
+
+  @override
+  String get fieldAnnualIncome => 'वार्षिक उत्पन्न (₹)';
+
+  @override
+  String get fieldLandHolding => 'जमीन (एकर)';
+
+  @override
+  String get fieldFamilySize => 'कुटुंब आकार';
+
+  @override
+  String get fieldBplCard => 'BPL कार्ड';
+
+  @override
+  String get fieldAadhaar => 'आधार कार्ड';
+
+  @override
+  String get fieldBankAccount => 'बँक खाते';
+
+  @override
+  String get fieldWidow => 'विधवा';
+
+  @override
+  String get fieldDisabled => 'दिव्यांग';
+
+  @override
+  String get fieldPregnant => 'गर्भवती';
+
+  @override
+  String get fieldEducation => 'शिक्षण';
+
+  @override
+  String get findEligibleSchemes => 'पात्र योजना शोधा';
+
+  @override
+  String get notDetected => 'आढळले नाही';
+
+  @override
+  String get members => 'सदस्य';
+
+  @override
+  String get acres => 'एकर';
+
+  @override
+  String get genderMale => 'पुरुष';
+
+  @override
+  String get genderFemale => 'महिला';
+
+  @override
+  String get occupationFarmer => 'शेतकरी';
+
+  @override
+  String get occupationStudent => 'विद्यार्थी';
+
+  @override
+  String get occupationDailyWage => 'दैनिक मजूर';
+
+  @override
+  String get occupationBusiness => 'व्यवसाय';
+
+  @override
+  String get occupationGovernment => 'सरकारी';
+
+  @override
+  String get occupationUnemployed => 'बेरोजगार';
+
+  @override
+  String get categoryWomenChild => 'महिला आणि बाल';
+
+  @override
+  String get share => 'सामायिक करा';
+
+  @override
+  String get documentsReady => 'कागदपत्रे तयार आहेत';
+
+  @override
+  String get saveForLater => 'नंतर साठी सेव्ह करा';
+
+  @override
+  String get applyAnyway => 'तरीही अर्ज करा';
+
+  @override
+  String get close => 'बंद करा';
+
+  @override
+  String get documentsMissing => 'कागदपत्रे नाहीत';
+
+  @override
+  String get documentsSaved => 'नंतर साठी सेव्ह केले - माझे अर्ज तपासा';
+
+  @override
+  String get documentsYouNeed => 'तुम्हाला आवश्यक कागदपत्रे';
+
+  @override
+  String get documentsReadyTitle => 'कागदपत्रे तयार';
+
+  @override
+  String get of => 'पैकी';
+
+  @override
+  String get applyNowButton => 'आता अर्ज करा ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'नजीकच्या सरकारी कार्यालयात जा मान्यता प्राप्त ID पुराव्यासह.';
+
+  @override
+  String get fieldMinistry => 'मंत्रालय';
 }

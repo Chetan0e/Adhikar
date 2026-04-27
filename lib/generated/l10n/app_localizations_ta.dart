@@ -109,14 +109,14 @@ class AppLocalizationsTa extends AppLocalizations {
   String get totalEstimatedBenefits => 'மொத்த மதிப்பிடப்பட்ட பலன்கள்';
 
   @override
-  String get eligibleSchemes => 'தகுதியான திட்டங்கள்';
+  String get eligibleSchemes => 'தகுந்த திட்டங்கள்';
 
   @override
   String get noSchemesFound => 'திட்டங்கள் எதுவும் கிடைக்கவில்லை';
 
   @override
   String get tryUpdatingProfile =>
-      'உங்கள் சுயவிவர தகவலை புதுப்பிக்க முயற்சிக்கவும்';
+      'தகுந்த திட்டங்களைப் பார்க்க உங்கள் சுயவிவரத்தை புதுப்பிக்கவும்';
 
   @override
   String get applyNow => 'இப்போதே விண்ணப்பிக்கவும்';
@@ -177,17 +177,37 @@ class AppLocalizationsTa extends AppLocalizations {
   }
 
   @override
-  String get applicationHistory => 'விண்ணப்ப வரலாறு';
+  String get applicationHistory => 'விண்ணப்பு வரலாறு';
 
   @override
-  String get noApplications =>
-      'இன்னும் விண்ணப்பங்கள் இல்லை. இப்போதே கண்டறியுங்கள்!';
+  String get noApplications => 'விண்ணப்புகள் இல்லை';
+
+  @override
+  String get allSchemes => 'அனைத்து திட்டங்கள்';
+
+  @override
+  String get forUser => 'க்கு';
+
+  @override
+  String get hearResults => 'முடிவுகளைக் கேளுங்கள்';
+
+  @override
+  String get eligible => 'தகுதி';
+
+  @override
+  String get benefits => 'நன்மைகள்';
+
+  @override
+  String get noSchemesMatch => 'பொருந்தக்கூடிய திட்டங்கள் இல்லை';
+
+  @override
+  String get noSchemesInCategory => 'இந்த வகையில் திட்டங்கள் இல்லை';
 
   @override
   String get statusSubmitted => 'சமர்ப்பிக்கப்பட்டது';
 
   @override
-  String get statusUnderReview => 'மதிப்பாய்வில்';
+  String get statusUnderReview => 'Under Review';
 
   @override
   String get statusApproved => 'அனுமதிக்கப்பட்டது';
@@ -440,4 +460,144 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get history => 'வரலாறு';
+
+  @override
+  String get personalInfo => 'தனிப்பட்ட தகவல்';
+
+  @override
+  String get economicInfo => 'பொருளாதார தகவல்';
+
+  @override
+  String get socialStatus => 'சமூக நிலை';
+
+  @override
+  String get fieldName => 'பெயர்';
+
+  @override
+  String get fieldAge => 'வயது';
+
+  @override
+  String get fieldGender => 'பாலினம்';
+
+  @override
+  String get fieldState => 'மாநிலம்';
+
+  @override
+  String get fieldDistrict => 'மாவட்டம்';
+
+  @override
+  String get fieldCaste => 'சாதி';
+
+  @override
+  String get fieldOccupation => 'தொழில்';
+
+  @override
+  String get fieldAnnualIncome => 'ஆண்டு வருமானம் (₹)';
+
+  @override
+  String get fieldLandHolding => 'நிலம் (ஏக்கர்)';
+
+  @override
+  String get fieldFamilySize => 'குடும்ப அளவு';
+
+  @override
+  String get fieldBplCard => 'BPL கார்டு';
+
+  @override
+  String get fieldAadhaar => 'ஆதார் கார்டு';
+
+  @override
+  String get fieldBankAccount => 'வங்கி கணக்கு';
+
+  @override
+  String get fieldWidow => 'விதவை';
+
+  @override
+  String get fieldDisabled => 'ஊனமுற்றவர்';
+
+  @override
+  String get fieldPregnant => 'கர்ப்பிணி';
+
+  @override
+  String get fieldEducation => 'கல்வி';
+
+  @override
+  String get findEligibleSchemes => 'தகுதியான திட்டங்களைக் கண்டறியவும்';
+
+  @override
+  String get notDetected => 'கண்டறியப்படவில்லை';
+
+  @override
+  String get members => 'உறுப்பினர்கள்';
+
+  @override
+  String get acres => 'ஏக்கர்';
+
+  @override
+  String get genderMale => 'ஆண்';
+
+  @override
+  String get genderFemale => 'பெண்';
+
+  @override
+  String get occupationFarmer => 'விவசாயி';
+
+  @override
+  String get occupationStudent => 'மாணவர்';
+
+  @override
+  String get occupationDailyWage => 'தினசரி கூலி';
+
+  @override
+  String get occupationBusiness => 'வணிகம்';
+
+  @override
+  String get occupationGovernment => 'அரசு';
+
+  @override
+  String get occupationUnemployed => 'வேலையில்லாதவர்';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

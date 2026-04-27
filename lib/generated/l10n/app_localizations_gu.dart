@@ -107,13 +107,14 @@ class AppLocalizationsGu extends AppLocalizations {
   String get totalEstimatedBenefits => 'કુલ અંદાજ';
 
   @override
-  String get eligibleSchemes => 'પાત્ર યોજનાઓ';
+  String get eligibleSchemes => 'યોગ્ય યોજનાઓ';
 
   @override
   String get noSchemesFound => 'કોઈ યોજના ન મળી';
 
   @override
-  String get tryUpdatingProfile => 'પ્રોફાઇલ અપડેટ કરો';
+  String get tryUpdatingProfile =>
+      'યોગ્ય યોજનાઓ જોવા માટે તમારી પ્રોફાઇલ અપડેટ કરો';
 
   @override
   String get applyNow => 'અરજી કરો';
@@ -176,7 +177,28 @@ class AppLocalizationsGu extends AppLocalizations {
   String get applicationHistory => 'ઇતિહાસ';
 
   @override
-  String get noApplications => 'અરજી નથી. શોધો!';
+  String get noApplications => 'અરજી નથી';
+
+  @override
+  String get allSchemes => 'બધી યોજનાઓ';
+
+  @override
+  String get forUser => 'માટે';
+
+  @override
+  String get hearResults => 'પરિણામ સાંભળો';
+
+  @override
+  String get eligible => 'યોગ્ય';
+
+  @override
+  String get benefits => 'લાભો';
+
+  @override
+  String get noSchemesMatch => 'કોઈ યોજના બંધબેસતી નથી';
+
+  @override
+  String get noSchemesInCategory => 'આ શ્રેણીમાં કોઈ યોજના નથી';
 
   @override
   String get statusSubmitted => 'સબમિટ';
@@ -426,4 +448,144 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get history => 'ઇતિહાસ';
+
+  @override
+  String get personalInfo => 'વ્યક્તિગત માહિતી';
+
+  @override
+  String get economicInfo => 'આર્થિક માહિતી';
+
+  @override
+  String get socialStatus => 'સામાજિક સ્થિતિ';
+
+  @override
+  String get fieldName => 'નામ';
+
+  @override
+  String get fieldAge => 'વય';
+
+  @override
+  String get fieldGender => 'લિંગ';
+
+  @override
+  String get fieldState => 'રાજ્ય';
+
+  @override
+  String get fieldDistrict => 'જિલ્લો';
+
+  @override
+  String get fieldCaste => 'જાતિ';
+
+  @override
+  String get fieldOccupation => 'વ્યવસાય';
+
+  @override
+  String get fieldAnnualIncome => 'વાર્ષિક આવક (₹)';
+
+  @override
+  String get fieldLandHolding => 'જમીન (એકર)';
+
+  @override
+  String get fieldFamilySize => 'કુટુંબનું કદ';
+
+  @override
+  String get fieldBplCard => 'BPL કાર્ડ';
+
+  @override
+  String get fieldAadhaar => 'આધાર કાર્ડ';
+
+  @override
+  String get fieldBankAccount => 'બેંક ખાતું';
+
+  @override
+  String get fieldWidow => 'વિધવા';
+
+  @override
+  String get fieldDisabled => 'દિવ્યાંગ';
+
+  @override
+  String get fieldPregnant => 'ગર્ભવતી';
+
+  @override
+  String get fieldEducation => 'શિક્ષણ';
+
+  @override
+  String get findEligibleSchemes => 'યોગ્ય યોજનાઓ શોધો';
+
+  @override
+  String get notDetected => 'મળ્યું નથી';
+
+  @override
+  String get members => 'સભ્યો';
+
+  @override
+  String get acres => 'એકર';
+
+  @override
+  String get genderMale => 'પુરુષ';
+
+  @override
+  String get genderFemale => 'સ્ત્રી';
+
+  @override
+  String get occupationFarmer => 'ખેડૂત';
+
+  @override
+  String get occupationStudent => 'વિદ્યાર્થી';
+
+  @override
+  String get occupationDailyWage => 'દૈનિક મજૂર';
+
+  @override
+  String get occupationBusiness => 'વ્યવસાય';
+
+  @override
+  String get occupationGovernment => 'સરકારી';
+
+  @override
+  String get occupationUnemployed => 'બેરોજગાર';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

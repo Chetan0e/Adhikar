@@ -62,14 +62,17 @@ class SchemeSeeder {
   /// Convert old scheme format to new multilingual format
   Map<String, dynamic> _convertToMultilingualFormat(Map<String, dynamic> oldData) {
     final name = oldData['name'] as String;
-    final nameHindi = oldData['name_hindi'] as String? ?? '';
+    final nameHindi = oldData['name_hi'] as String? ?? oldData['name_hindi'] as String? ?? '';
+    final nameMarathi = oldData['name_mr'] as String? ?? '';
     final description = oldData['description'] as String;
+    final descriptionHindi = oldData['description_hi'] as String? ?? '';
+    final descriptionMarathi = oldData['description_mr'] as String? ?? '';
 
     return {
       'id': oldData['id'],
       'name_en': name,
       'name_hi': nameHindi,
-      'name_mr': '', // TODO: Add Marathi translations
+      'name_mr': nameMarathi,
       'name_ta': '', // TODO: Add Tamil translations
       'name_te': '', // TODO: Add Telugu translations
       'name_kn': '', // TODO: Add Kannada translations
@@ -79,8 +82,8 @@ class SchemeSeeder {
       'name_or': '', // TODO: Add Odia translations
       'name_pa': '', // TODO: Add Punjabi translations
       'description_en': description,
-      'description_hi': description, // TODO: Add Hindi translations
-      'description_mr': '', // TODO: Add Marathi translations
+      'description_hi': descriptionHindi,
+      'description_mr': descriptionMarathi,
       'description_ta': '', // TODO: Add Tamil translations
       'description_te': '', // TODO: Add Telugu translations
       'description_kn': '', // TODO: Add Kannada translations

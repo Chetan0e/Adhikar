@@ -108,13 +108,14 @@ class AppLocalizationsBn extends AppLocalizations {
   String get totalEstimatedBenefits => 'মোট আনুমানিক সুবিধা';
 
   @override
-  String get eligibleSchemes => 'যোগ্য প্রকল্পসমূহ';
+  String get eligibleSchemes => 'যোগ্য প্রকল্পগুলি';
 
   @override
   String get noSchemesFound => 'কোনো প্রকল্প পাওয়া যায়নি';
 
   @override
-  String get tryUpdatingProfile => 'আপনার প্রোফাইল তথ্য আপডেট করুন';
+  String get tryUpdatingProfile =>
+      'প্রযোজ্য প্রকল্পগুলি দেখতে আপনার প্রোফাইল আপডেট করুন';
 
   @override
   String get applyNow => 'এখনই আবেদন করুন';
@@ -177,7 +178,28 @@ class AppLocalizationsBn extends AppLocalizations {
   String get applicationHistory => 'আবেদনের ইতিহাস';
 
   @override
-  String get noApplications => 'এখনো কোনো আবেদন নেই। এখনই খুঁজুন!';
+  String get noApplications => 'এখনো কোনো আবেদন নেই';
+
+  @override
+  String get allSchemes => 'সব প্রকল্পগুলি';
+
+  @override
+  String get forUser => 'এর জন্য';
+
+  @override
+  String get hearResults => 'ফলাফল শুনুন';
+
+  @override
+  String get eligible => 'যোগ্য';
+
+  @override
+  String get benefits => 'সুবিধা';
+
+  @override
+  String get noSchemesMatch => 'কোনো প্রকল্প মেলেনি';
+
+  @override
+  String get noSchemesInCategory => 'এই বিভাগে কোনো প্রকল্প নেই';
 
   @override
   String get statusSubmitted => 'জমা দেওয়া হয়েছে';
@@ -435,4 +457,144 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get history => 'ইতিহাস';
+
+  @override
+  String get personalInfo => 'ব্যক্তিগত তথ্য';
+
+  @override
+  String get economicInfo => 'অর্থনৈতিক তথ্য';
+
+  @override
+  String get socialStatus => 'সামাজিক অবস্থা';
+
+  @override
+  String get fieldName => 'নাম';
+
+  @override
+  String get fieldAge => 'বয়স';
+
+  @override
+  String get fieldGender => 'লিঙ্গ';
+
+  @override
+  String get fieldState => 'রাজ্য';
+
+  @override
+  String get fieldDistrict => 'জেলা';
+
+  @override
+  String get fieldCaste => 'জাতি';
+
+  @override
+  String get fieldOccupation => 'পেশা';
+
+  @override
+  String get fieldAnnualIncome => 'বার্ষিক আয (₹)';
+
+  @override
+  String get fieldLandHolding => 'জমি (একর)';
+
+  @override
+  String get fieldFamilySize => 'পরিবারের আকার';
+
+  @override
+  String get fieldBplCard => 'BPL কার্ড';
+
+  @override
+  String get fieldAadhaar => 'আধার কার্ড';
+
+  @override
+  String get fieldBankAccount => 'ব্যাংক অ্যাকাউন্ট';
+
+  @override
+  String get fieldWidow => 'বিধবা';
+
+  @override
+  String get fieldDisabled => 'প্রতিবন্ধী';
+
+  @override
+  String get fieldPregnant => 'গর্ভবতী';
+
+  @override
+  String get fieldEducation => 'শিক্ষা';
+
+  @override
+  String get findEligibleSchemes => 'যোগ্য প্রকল্প খুঁজুন';
+
+  @override
+  String get notDetected => 'সনাক্ত হয়নি';
+
+  @override
+  String get members => 'সদস্য';
+
+  @override
+  String get acres => 'একর';
+
+  @override
+  String get genderMale => 'পুরুষ';
+
+  @override
+  String get genderFemale => 'মহিলা';
+
+  @override
+  String get occupationFarmer => 'কৃষক';
+
+  @override
+  String get occupationStudent => 'ছাত্র';
+
+  @override
+  String get occupationDailyWage => 'দিনমজুর';
+
+  @override
+  String get occupationBusiness => 'ব্যবসা';
+
+  @override
+  String get occupationGovernment => 'সরকারি';
+
+  @override
+  String get occupationUnemployed => 'বেকার';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

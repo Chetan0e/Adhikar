@@ -97,43 +97,59 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
     setState(() => _isExtracting = true);
 
     try {
+      print('=== CONTINUE TAPPED ===');
+      print('Transcript: $_transcript');
+
       // Extract profile using Gemini before navigation
       final langCode = context.read<LanguageCubit>().currentLanguageCode;
       final langInstruction = SupportedLanguages.geminiLanguageInstruction(langCode);
-      
-      final profileData = await _geminiService.extractProfile(
-        _transcript,
-        languageHint: langInstruction,
-      );
+
+      print('Calling Gemini extractProfile...');
+      final profileData = await _geminiService.extractProfile(_transcript);
+      print('Gemini returned: $profileData');
+
+      // CRITICAL: Never navigate with null — always use fallback
+      final safeProfile = (profileData == null || profileData.isEmpty)
+          ? _buildFallbackProfile(_transcript)
+          : profileData;
+
+      print('Navigating with profile: $safeProfile');
 
       if (mounted) {
         setState(() => _isExtracting = false);
-        
+
         // Navigate with extracted profile data
         Navigator.pushNamed(
           context,
           AppRouter.profile,
-          arguments: {'transcript': _transcript, 'profileData': profileData},
+          arguments: safeProfile,
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      print('extractProfile ERROR: $e');
+      print(stack);
+
+      // Still navigate with fallback — never leave user stuck
+      final fallback = _buildFallbackProfile(_transcript);
+      print('Navigating with fallback profile: $fallback');
+
       if (mounted) {
         setState(() => _isExtracting = false);
-        final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red[700],
-          ),
-        );
-        // Even on error, navigate with empty profile so user can fill manually
         Navigator.pushNamed(
           context,
           AppRouter.profile,
-          arguments: {'transcript': _transcript, 'profileData': null},
+          arguments: fallback,
         );
       }
     }
+  }
+
+  Map<String, dynamic> _buildFallbackProfile(String transcript) {
+    // Use GeminiService's smart local extraction which supports all Indian languages
+    final fallback = _geminiService.smartLocalExtract(transcript);
+    fallback['_raw_transcript'] = transcript;
+    fallback['_is_fallback'] = true;
+    return fallback;
   }
 
   @override

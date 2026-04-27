@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @tryUpdatingProfile.
   ///
   /// In en, this message translates to:
-  /// **'Try updating your profile information'**
+  /// **'Try updating your profile to see eligible schemes'**
   String get tryUpdatingProfile;
 
   /// No description provided for @applyNow.
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @whyEligible.
   ///
   /// In en, this message translates to:
-  /// **'Why Eligible:'**
+  /// **'Why Eligible?'**
   String get whyEligible;
 
   /// No description provided for @description.
@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @howToGet.
   ///
   /// In en, this message translates to:
-  /// **'How to get this'**
+  /// **'How to get?'**
   String get howToGet;
 
   /// No description provided for @findNearestOffice.
@@ -431,8 +431,50 @@ abstract class AppLocalizations {
   /// No description provided for @noApplications.
   ///
   /// In en, this message translates to:
-  /// **'No applications yet. Discover your schemes!'**
+  /// **'No applications yet'**
   String get noApplications;
+
+  /// No description provided for @allSchemes.
+  ///
+  /// In en, this message translates to:
+  /// **'All Schemes'**
+  String get allSchemes;
+
+  /// No description provided for @forUser.
+  ///
+  /// In en, this message translates to:
+  /// **'For'**
+  String get forUser;
+
+  /// No description provided for @hearResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Hear results'**
+  String get hearResults;
+
+  /// No description provided for @eligible.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible'**
+  String get eligible;
+
+  /// No description provided for @benefits.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefits'**
+  String get benefits;
+
+  /// No description provided for @noSchemesMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No schemes match'**
+  String get noSchemesMatch;
+
+  /// No description provided for @noSchemesInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No schemes in this category'**
+  String get noSchemesInCategory;
 
   /// No description provided for @statusSubmitted.
   ///
@@ -919,6 +961,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'History'**
   String get history;
+
+  /// No description provided for @personalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInfo;
+
+  /// No description provided for @economicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Economic Information'**
+  String get economicInfo;
+
+  /// No description provided for @socialStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Status'**
+  String get socialStatus;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get fieldName;
+
+  /// No description provided for @fieldAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get fieldAge;
+
+  /// No description provided for @fieldGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get fieldGender;
+
+  /// No description provided for @fieldState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get fieldState;
+
+  /// No description provided for @fieldDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get fieldDistrict;
+
+  /// No description provided for @fieldCaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Caste'**
+  String get fieldCaste;
+
+  /// No description provided for @fieldOccupation.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation'**
+  String get fieldOccupation;
+
+  /// No description provided for @fieldAnnualIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Income ()'**
+  String get fieldAnnualIncome;
+
+  /// No description provided for @fieldLandHolding.
+  ///
+  /// In en, this message translates to:
+  /// **'Land (acres)'**
+  String get fieldLandHolding;
+
+  /// No description provided for @fieldFamilySize.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Size'**
+  String get fieldFamilySize;
+
+  /// No description provided for @fieldBplCard.
+  ///
+  /// In en, this message translates to:
+  /// **'BPL Card'**
+  String get fieldBplCard;
+
+  /// No description provided for @fieldAadhaar.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar Card'**
+  String get fieldAadhaar;
+
+  /// No description provided for @fieldBankAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Account'**
+  String get fieldBankAccount;
+
+  /// No description provided for @fieldWidow.
+  ///
+  /// In en, this message translates to:
+  /// **'Widow'**
+  String get fieldWidow;
+
+  /// No description provided for @fieldDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get fieldDisabled;
+
+  /// No description provided for @fieldPregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant'**
+  String get fieldPregnant;
+
+  /// No description provided for @fieldEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get fieldEducation;
+
+  /// No description provided for @findEligibleSchemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Eligible Schemes'**
+  String get findEligibleSchemes;
+
+  /// No description provided for @notDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not detected'**
+  String get notDetected;
+
+  /// No description provided for @members.
+  ///
+  /// In en, this message translates to:
+  /// **'members'**
+  String get members;
+
+  /// No description provided for @acres.
+  ///
+  /// In en, this message translates to:
+  /// **'acres'**
+  String get acres;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get genderMale;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get genderFemale;
+
+  /// No description provided for @occupationFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer'**
+  String get occupationFarmer;
+
+  /// No description provided for @occupationStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get occupationStudent;
+
+  /// No description provided for @occupationDailyWage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Wage'**
+  String get occupationDailyWage;
+
+  /// No description provided for @occupationBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get occupationBusiness;
+
+  /// No description provided for @occupationGovernment.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get occupationGovernment;
+
+  /// No description provided for @occupationUnemployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unemployed'**
+  String get occupationUnemployed;
+
+  /// No description provided for @categoryWomenChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Women & Child'**
+  String get categoryWomenChild;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @documentsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents Ready'**
+  String get documentsReady;
+
+  /// No description provided for @saveForLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Save for Later'**
+  String get saveForLater;
+
+  /// No description provided for @applyAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Anyway'**
+  String get applyAnyway;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @documentsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'documents missing. Gather them before applying.'**
+  String get documentsMissing;
+
+  /// No description provided for @documentsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved for later — check My Applications'**
+  String get documentsSaved;
+
+  /// No description provided for @documentsYouNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents You Need'**
+  String get documentsYouNeed;
+
+  /// No description provided for @documentsReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents Ready'**
+  String get documentsReadyTitle;
+
+  /// No description provided for @of.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get of;
+
+  /// No description provided for @applyNowButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Now ✓'**
+  String get applyNowButton;
+
+  /// No description provided for @visitGovtOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit your nearest government office with valid ID proof.'**
+  String get visitGovtOffice;
+
+  /// No description provided for @fieldMinistry.
+  ///
+  /// In en, this message translates to:
+  /// **'Ministry'**
+  String get fieldMinistry;
 }
 
 class _AppLocalizationsDelegate

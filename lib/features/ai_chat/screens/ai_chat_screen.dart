@@ -35,12 +35,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
   void initState() {
     super.initState();
     _ttsService.init();
-    // Welcome message
+    // Welcome message using localized greeting from GeminiService
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final l10n = AppLocalizations.of(context);
-      if (l10n != null) {
-        _addBotMessage(l10n.aiGreeting);
-      }
+      final langCode = context.read<LanguageCubit>().currentLanguageCode;
+      final greeting = _geminiService.localizedGreeting(langCode);
+      _addBotMessage(greeting);
     });
   }
 

@@ -114,7 +114,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSchemesFound => 'No schemes found';
 
   @override
-  String get tryUpdatingProfile => 'Try updating your profile information';
+  String get tryUpdatingProfile =>
+      'Try updating your profile to see eligible schemes';
 
   @override
   String get applyNow => 'Apply Now';
@@ -129,7 +130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eligibilityScore => 'Eligibility Score';
 
   @override
-  String get whyEligible => 'Why Eligible:';
+  String get whyEligible => 'Why Eligible?';
 
   @override
   String get description => 'Description';
@@ -159,7 +160,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missingDocuments => 'Missing documents → Save for later';
 
   @override
-  String get howToGet => 'How to get this';
+  String get howToGet => 'How to get?';
 
   @override
   String get findNearestOffice => 'Find Nearest Office';
@@ -177,7 +178,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get applicationHistory => 'Application History';
 
   @override
-  String get noApplications => 'No applications yet. Discover your schemes!';
+  String get noApplications => 'No applications yet';
+
+  @override
+  String get allSchemes => 'All Schemes';
+
+  @override
+  String get forUser => 'For';
+
+  @override
+  String get hearResults => 'Hear results';
+
+  @override
+  String get eligible => 'Eligible';
+
+  @override
+  String get benefits => 'Benefits';
+
+  @override
+  String get noSchemesMatch => 'No schemes match';
+
+  @override
+  String get noSchemesInCategory => 'No schemes in this category';
 
   @override
   String get statusSubmitted => 'Submitted';
@@ -433,4 +455,144 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get history => 'History';
+
+  @override
+  String get personalInfo => 'Personal Information';
+
+  @override
+  String get economicInfo => 'Economic Information';
+
+  @override
+  String get socialStatus => 'Social Status';
+
+  @override
+  String get fieldName => 'Name';
+
+  @override
+  String get fieldAge => 'Age';
+
+  @override
+  String get fieldGender => 'Gender';
+
+  @override
+  String get fieldState => 'State';
+
+  @override
+  String get fieldDistrict => 'District';
+
+  @override
+  String get fieldCaste => 'Caste';
+
+  @override
+  String get fieldOccupation => 'Occupation';
+
+  @override
+  String get fieldAnnualIncome => 'Annual Income ()';
+
+  @override
+  String get fieldLandHolding => 'Land (acres)';
+
+  @override
+  String get fieldFamilySize => 'Family Size';
+
+  @override
+  String get fieldBplCard => 'BPL Card';
+
+  @override
+  String get fieldAadhaar => 'Aadhaar Card';
+
+  @override
+  String get fieldBankAccount => 'Bank Account';
+
+  @override
+  String get fieldWidow => 'Widow';
+
+  @override
+  String get fieldDisabled => 'Disabled';
+
+  @override
+  String get fieldPregnant => 'Pregnant';
+
+  @override
+  String get fieldEducation => 'Education';
+
+  @override
+  String get findEligibleSchemes => 'Find Eligible Schemes';
+
+  @override
+  String get notDetected => 'Not detected';
+
+  @override
+  String get members => 'members';
+
+  @override
+  String get acres => 'acres';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get occupationFarmer => 'Farmer';
+
+  @override
+  String get occupationStudent => 'Student';
+
+  @override
+  String get occupationDailyWage => 'Daily Wage';
+
+  @override
+  String get occupationBusiness => 'Business';
+
+  @override
+  String get occupationGovernment => 'Government';
+
+  @override
+  String get occupationUnemployed => 'Unemployed';
+
+  @override
+  String get categoryWomenChild => 'Women & Child';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get documentsReady => 'Documents Ready';
+
+  @override
+  String get saveForLater => 'Save for Later';
+
+  @override
+  String get applyAnyway => 'Apply Anyway';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get documentsMissing =>
+      'documents missing. Gather them before applying.';
+
+  @override
+  String get documentsSaved => 'Saved for later — check My Applications';
+
+  @override
+  String get documentsYouNeed => 'Documents You Need';
+
+  @override
+  String get documentsReadyTitle => 'Documents Ready';
+
+  @override
+  String get of => 'of';
+
+  @override
+  String get applyNowButton => 'Apply Now ✓';
+
+  @override
+  String get visitGovtOffice =>
+      'Visit your nearest government office with valid ID proof.';
+
+  @override
+  String get fieldMinistry => 'Ministry';
 }

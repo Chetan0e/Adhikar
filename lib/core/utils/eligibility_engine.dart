@@ -27,31 +27,48 @@ class EligibilityEngine {
     return results;
   }
 
-  /// Check eligibility for a single scheme
+  /// Check eligibility for a single scheme - handles partial/empty profile data gracefully
   Map<String, dynamic> _checkEligibility(UserProfile profile, Scheme scheme) {
     final criteria = scheme.eligibility;
-    double score = 1.0;
+    double score = 0.3; // Base score for showing scheme (was 1.0)
     List<String> reasons = [];
     List<String> missingDocs = [];
+    bool hasProfileData = false;
 
-    // Age check
-    if (criteria.minAge != null && profile.age < criteria.minAge!) {
-      return {
-        'score': 0.0,
-        'reasons': ['Age below minimum requirement (${criteria.minAge} years)'],
-        'missingDocs': <String>[],
-      };
-    }
-    if (criteria.maxAge != null && profile.age > criteria.maxAge!) {
-      return {
-        'score': 0.0,
-        'reasons': ['Age above maximum requirement (${criteria.maxAge} years)'],
-        'missingDocs': <String>[],
-      };
+    // Check if we have meaningful profile data
+    if (profile.age > 0 || profile.gender.isNotEmpty || profile.occupation.isNotEmpty || 
+        profile.caste.isNotEmpty || profile.annualIncome > 0 || profile.hasBPLCard ||
+        profile.hasAadhar || profile.landHolding > 0) {
+      hasProfileData = true;
+      score = 0.5; // Start with neutral score when profile data exists
     }
 
-    // Gender check
-    if (criteria.genders != null && criteria.genders!.isNotEmpty) {
+    // Age check - only disqualify if we have age data and it's out of range
+    if (criteria.minAge != null && profile.age > 0) {
+      if (profile.age < criteria.minAge!) {
+        return {
+          'score': 0.0,
+          'reasons': ['Age below minimum requirement (${criteria.minAge} years)'],
+          'missingDocs': <String>[],
+        };
+      }
+      reasons.add('Age meets minimum requirement');
+      score += 0.1;
+    }
+    if (criteria.maxAge != null && profile.age > 0) {
+      if (profile.age > criteria.maxAge!) {
+        return {
+          'score': 0.0,
+          'reasons': ['Age above maximum requirement (${criteria.maxAge} years)'],
+          'missingDocs': <String>[],
+        };
+      }
+      reasons.add('Age within maximum limit');
+      score += 0.1;
+    }
+
+    // Gender check - only disqualify if gender is specified and doesn't match
+    if (criteria.genders != null && criteria.genders!.isNotEmpty && profile.gender.isNotEmpty) {
       if (!criteria.genders!.contains(profile.gender)) {
         return {
           'score': 0.0,
@@ -59,10 +76,12 @@ class EligibilityEngine {
           'missingDocs': <String>[],
         };
       }
+      reasons.add('Gender matches requirement');
+      score += 0.15;
     }
 
-    // Income check
-    if (criteria.maxIncome != null) {
+    // Income check - only check if we have income data
+    if (criteria.maxIncome != null && profile.annualIncome > 0) {
       if (profile.annualIncome > criteria.maxIncome!) {
         return {
           'score': 0.0,
@@ -71,16 +90,18 @@ class EligibilityEngine {
         };
       } else {
         reasons.add('Income within eligible limit');
+        score += 0.1;
       }
     }
 
-    // Caste check (not a hard disqualifier for some schemes)
-    if (criteria.castes != null && criteria.castes!.isNotEmpty) {
+    // Caste check (not a hard disqualifier)
+    if (criteria.castes != null && criteria.castes!.isNotEmpty && profile.caste.isNotEmpty) {
       if (!criteria.castes!.contains(profile.caste)) {
-        score *= 0.5;
+        score *= 0.7;
         reasons.add('Caste not in priority category, may still apply');
       } else {
         reasons.add('Belongs to eligible caste category');
+        score += 0.1;
       }
     }
 
@@ -88,27 +109,28 @@ class EligibilityEngine {
     if (criteria.requiresBPL == true) {
       if (!profile.hasBPLCard) {
         score *= 0.6;
-        reasons.add('BPL card recommended but may not be mandatory in all states');
+        missingDocs.add('BPL Card');
+        reasons.add('BPL card recommended');
       } else {
         reasons.add('Has BPL card');
+        score += 0.15;
       }
     }
 
-    // Occupation check
-    if (criteria.occupations != null && criteria.occupations!.isNotEmpty) {
+    // Occupation check - only check if occupation is specified
+    if (criteria.occupations != null && criteria.occupations!.isNotEmpty && profile.occupation.isNotEmpty) {
       if (!criteria.occupations!.contains(profile.occupation)) {
-        return {
-          'score': 0.0,
-          'reasons': ['Occupation "${profile.occupation}" not eligible for this scheme'],
-          'missingDocs': <String>[],
-        };
+        // Don't fully disqualify, just reduce score
+        score *= 0.5;
+        reasons.add('Occupation may not match, verify eligibility');
       } else {
         reasons.add('Occupation matches requirements');
+        score += 0.15;
       }
     }
 
-    // Land holding check
-    if (criteria.maxLandHolding != null) {
+    // Land holding check - only if we have land data
+    if (criteria.maxLandHolding != null && profile.landHolding >= 0) {
       if (profile.landHolding > criteria.maxLandHolding!) {
         return {
           'score': 0.0,
@@ -117,61 +139,60 @@ class EligibilityEngine {
         };
       } else {
         reasons.add('Land holding within eligible limit');
+        score += 0.1;
       }
     }
 
-    // Special conditions
+    // Special conditions - only check if profile has relevant data
     if (criteria.specificCondition != null) {
       final condition = criteria.specificCondition!.toLowerCase();
       
-      if (condition.contains('widow') && !profile.isWidow) {
-        return {
-          'score': 0.0,
-          'reasons': ['Scheme is only for widows'],
-          'missingDocs': <String>[],
-        };
-      }
-      if (condition.contains('widow') && profile.isWidow) {
-        reasons.add('Widow status confirmed');
-      }
-
-      if (condition.contains('pregnant') && !profile.isPregnant) {
-        return {
-          'score': 0.0,
-          'reasons': ['Scheme is only for pregnant women'],
-          'missingDocs': <String>[],
-        };
-      }
-      if (condition.contains('pregnant') && profile.isPregnant) {
-        reasons.add('Pregnancy status confirmed');
+      // Widow check - only if we have widow data
+      if (condition.contains('widow')) {
+        if (profile.isWidow) {
+          reasons.add('Widow status confirmed');
+          score += 0.2;
+        } else if (hasProfileData) {
+          // Don't disqualify, just note it
+          reasons.add('Widow status may be required');
+        }
       }
 
-      if (condition.contains('girl') || condition.contains('female')) {
-        if (profile.gender != 'female') {
+      // Pregnant check - only if we have pregnancy data
+      if (condition.contains('pregnant')) {
+        if (profile.isPregnant) {
+          reasons.add('Pregnancy status confirmed');
+          score += 0.2;
+        } else if (hasProfileData && profile.gender == 'female') {
+          reasons.add('Pregnancy status may be required');
+        }
+      }
+
+      // Female/Girl check - only if gender is known
+      if ((condition.contains('girl') || condition.contains('female')) && profile.gender.isNotEmpty) {
+        if (profile.gender == 'female') {
+          reasons.add('Female applicant');
+          score += 0.15;
+        } else {
           return {
             'score': 0.0,
             'reasons': ['Scheme is only for females'],
             'missingDocs': <String>[],
           };
-        } else {
-          reasons.add('Female applicant');
         }
       }
 
-      if (condition.contains('disabled') || condition.contains('divyang')) {
-        if (!profile.isDisabled) {
-          return {
-            'score': 0.0,
-            'reasons': ['Scheme is only for persons with disabilities'],
-            'missingDocs': <String>[],
-          };
-        } else {
+      // Disabled check - only if we have disability data
+      if ((condition.contains('disabled') || condition.contains('divyang'))) {
+        if (profile.isDisabled) {
           reasons.add('Disability status confirmed');
+          score += 0.2;
+        } else if (hasProfileData) {
+          reasons.add('Disability certificate may be required');
         }
       }
 
       if (condition.contains('tb')) {
-        // This would need a separate field in profile
         reasons.add('TB status verification required');
       }
     }

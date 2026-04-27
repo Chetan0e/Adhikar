@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../generated/l10n/app_localizations.dart';
+import '../../schemes/screens/scheme_list_screen.dart';
 
 /// Application History screen — shows all past applications from Hive/Firestore
 class ApplicationHistoryScreen extends StatefulWidget {
@@ -87,7 +88,20 @@ class _ApplicationHistoryScreenState extends State<ApplicationHistoryScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              try {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SchemeListScreen()),
+                );
+              } catch (e) {
+                print('Navigation error: $e');
+                // Fallback: try to pop safely
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              }
+            },
             child: Text(l10n.eligibleSchemes),
           ),
         ],
