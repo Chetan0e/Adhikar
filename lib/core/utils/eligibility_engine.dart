@@ -5,16 +5,23 @@ class EligibilityEngine {
   /// Match user profile against schemes and return results with confidence scores
   List<SchemeMatch> matchSchemes(UserProfile profile, List<Scheme> schemes) {
     List<SchemeMatch> results = [];
+    print('[EligibilityEngine] Matching profile against ${schemes.length} schemes');
 
     for (var scheme in schemes) {
-      if (!scheme.isActive) continue;
+      if (!scheme.isActive) {
+        print('[EligibilityEngine] ${scheme.name}: SKIPPED (inactive)');
+        continue;
+      }
 
       final matchResult = _checkEligibility(profile, scheme);
+      final score = matchResult['score'] as double;
       
-      if (matchResult['score'] > 0.5) {
+      print('[EligibilityEngine] ${scheme.name}: score=${score.toStringAsFixed(2)}');
+      
+      if (score >= 0.5) {
         results.add(SchemeMatch(
           scheme: scheme,
-          confidence: matchResult['score'] as double,
+          confidence: score,
           reasons: List<String>.from(matchResult['reasons'] as List),
           missingDocuments: matchResult['missingDocs'] as List<String>,
           estimatedBenefit: scheme.benefitAmount,
@@ -24,6 +31,7 @@ class EligibilityEngine {
 
     // Sort by confidence score descending
     results.sort((a, b) => b.confidence.compareTo(a.confidence));
+    print('[EligibilityEngine] Total matched: ${results.length} schemes');
     return results;
   }
 
@@ -96,13 +104,17 @@ class EligibilityEngine {
 
     // Caste check (not a hard disqualifier)
     if (criteria.castes != null && criteria.castes!.isNotEmpty && profile.caste.isNotEmpty) {
+      print('[EligibilityEngine] Caste check: profile=${profile.caste}, required=${criteria.castes}');
       if (!criteria.castes!.contains(profile.caste)) {
         score *= 0.7;
         reasons.add('Caste not in priority category, may still apply');
       } else {
         reasons.add('Belongs to eligible caste category');
         score += 0.1;
+        print('[EligibilityEngine] Caste match! score now $score');
       }
+    } else {
+      print('[EligibilityEngine] Caste check skipped: criteria.castes=${criteria.castes}, profile.caste=${profile.caste}');
     }
 
     // BPL check
@@ -120,12 +132,30 @@ class EligibilityEngine {
     // Occupation check - only check if occupation is specified
     if (criteria.occupations != null && criteria.occupations!.isNotEmpty && profile.occupation.isNotEmpty) {
       if (!criteria.occupations!.contains(profile.occupation)) {
-        // Don't fully disqualify, just reduce score
-        score *= 0.5;
-        reasons.add('Occupation may not match, verify eligibility');
+        // HARD FAIL: Occupation mismatch disqualifies the scheme
+        return {
+          'score': 0.0,
+          'reasons': ['Scheme requires one of: ${criteria.occupations!.join(", ")}, but your occupation is ${profile.occupation}'],
+          'missingDocs': <String>[],
+        };
       } else {
         reasons.add('Occupation matches requirements');
         score += 0.15;
+      }
+    }
+
+    // Student check - for education schemes
+    if (criteria.isStudent == true) {
+      print('[EligibilityEngine] Student check: isStudent=${criteria.isStudent}, occupation=${profile.occupation}');
+      if (profile.occupation == 'student') {
+        reasons.add('Student status confirmed');
+        score += 0.2;
+        print('[EligibilityEngine] Student match! score now $score');
+      } else if (hasProfileData) {
+        // Don't disqualify, just note it
+        reasons.add('Student status may be required');
+        score += 0.05;
+        print('[EligibilityEngine] Student partial, score now $score');
       }
     }
 
@@ -197,26 +227,18 @@ class EligibilityEngine {
       }
     }
 
-    // Document requirements
-    if (criteria.requiresAadhar == true) {
-      if (!profile.hasAadhar) {
-        missingDocs.add('Aadhar Card');
-        score *= 0.8;
-      }
-    } else {
-      missingDocs.addAll(['Aadhar Card']);
+    // Document requirements - only penalize if explicitly required but missing
+    if (criteria.requiresAadhar == true && !profile.hasAadhar) {
+      missingDocs.add('Aadhar Card');
+      score *= 0.8;
     }
 
-    if (criteria.requiresBankAccount == true) {
-      if (!profile.hasBankAccount) {
-        missingDocs.add('Bank Passbook');
-        score *= 0.8;
-      }
-    } else {
-      missingDocs.addAll(['Bank Passbook']);
+    if (criteria.requiresBankAccount == true && !profile.hasBankAccount) {
+      missingDocs.add('Bank Passbook');
+      score *= 0.8;
     }
 
-    // Add general required documents
+    // Add general required documents from scheme
     missingDocs.addAll(scheme.requiredDocuments);
 
     // Remove duplicates

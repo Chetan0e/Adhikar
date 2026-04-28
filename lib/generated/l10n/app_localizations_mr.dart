@@ -583,7 +583,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get documentsReadyTitle => 'कागदपत्रे तयार';
 
   @override
-  String get of => 'पैकी';
+  String get ofWord => 'पैकी';
 
   @override
   String get applyNowButton => 'आता अर्ज करा ✓';

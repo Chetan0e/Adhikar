@@ -86,7 +86,16 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
   }
 
   void _handleContinue() async {
-    if (_transcript.isEmpty) {
+    final transcript = _transcript.trim();
+
+    print('╔══════════════════════════════════════╗');
+    print('║ CONTINUE PRESSED                     ║');
+    print('║ Transcript: "$transcript"            ║');
+    print('║ Transcript length: ${transcript.length} ║');
+    print('╚══════════════════════════════════════╝');
+
+    if (transcript.isEmpty) {
+      print('ERROR: Transcript empty — cannot extract');
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.pleaseSpeak)),
@@ -97,23 +106,16 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
     setState(() => _isExtracting = true);
 
     try {
-      print('=== CONTINUE TAPPED ===');
-      print('Transcript: $_transcript');
+      // Before calling Gemini, test local extraction:
+      final localResult = _geminiService.smartLocalExtract(transcript);
+      print('LOCAL EXTRACTION RESULT: $localResult');
 
-      // Extract profile using Gemini before navigation
-      final langCode = context.read<LanguageCubit>().currentLanguageCode;
-      final langInstruction = SupportedLanguages.geminiLanguageInstruction(langCode);
+      // Then call Gemini:
+      final geminiResult = await _geminiService.extractProfile(transcript);
+      print('GEMINI EXTRACTION RESULT: $geminiResult');
 
-      print('Calling Gemini extractProfile...');
-      final profileData = await _geminiService.extractProfile(_transcript);
-      print('Gemini returned: $profileData');
-
-      // CRITICAL: Never navigate with null — always use fallback
-      final safeProfile = (profileData == null || profileData.isEmpty)
-          ? _buildFallbackProfile(_transcript)
-          : profileData;
-
-      print('Navigating with profile: $safeProfile');
+      // What is passed to ProfileReviewScreen:
+      print('NAVIGATING WITH: ${geminiResult ?? localResult}');
 
       if (mounted) {
         setState(() => _isExtracting = false);
@@ -122,7 +124,7 @@ class _VoiceCaptureScreenState extends State<VoiceCaptureScreen> {
         Navigator.pushNamed(
           context,
           AppRouter.profile,
-          arguments: safeProfile,
+          arguments: geminiResult ?? localResult,
         );
       }
     } catch (e, stack) {

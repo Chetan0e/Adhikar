@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../app/router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../generated/l10n/app_localizations.dart';
 
 /// Shows a checklist of documents needed for a scheme.
 /// User taps to check off documents they have.
@@ -104,7 +104,7 @@ class _DocumentChecklistScreenState extends State<DocumentChecklistScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
-                '$done ${AppLocalizations.of(context)!.of} ${_documents.length}',
+                '$done ${AppLocalizations.of(context)!.ofWord} ${_documents.length}',
                 style: TextStyle(
                   color: _allChecked ? AppColors.accentGreen : AppColors.primary,
                   fontWeight: FontWeight.bold,

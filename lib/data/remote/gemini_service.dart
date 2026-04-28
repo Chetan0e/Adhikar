@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -20,6 +21,10 @@ class GeminiService {
 
   GeminiService({ConnectivityService? connectivityService})
       : _connectivityService = connectivityService ?? ConnectivityService() {
+    print('╔══════════════════════════════════════╗');
+    print('║  GeminiService INITIALIZATION         ║');
+    print('╚══════════════════════════════════════╝');
+    
     // Try to load from dotenv if not set via compile-time
     if (_apiKey.isEmpty) {
       try {
@@ -32,6 +37,9 @@ class GeminiService {
       print('GeminiService: Using compile-time API key');
     }
     print('GeminiService: API key set: ${_apiKey.isNotEmpty}');
+    print('GeminiService: API key length: ${_apiKey.length}');
+    print('GeminiService: First 8 chars: ${_apiKey.length > 8 ? _apiKey.substring(0, 8) : "N/A"}');
+    print('╚══════════════════════════════════════╝');
   }
 
   String get apiKey => _apiKey;
@@ -42,11 +50,9 @@ class GeminiService {
   // Extract user profile from voice transcript using Gemini AI
   // ─────────────────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> extractProfile(String transcript) async {
-    print('╔══ GEMINI extractProfile ══╗');
-    print('║ Key set: ${_apiKey.isNotEmpty}');
-    print('║ Key length: ${_apiKey.length}');
-    print('║ Transcript: $transcript');
-    print('╚═══════════════════════════╝');
+    print('extractProfile() CALLED');
+    print('API KEY: "${_apiKey.substring(0, _apiKey.length > 8 ? 8 : _apiKey.length)}..." length=${_apiKey.length}');
+    print('Transcript: "$transcript"');
 
     // ALWAYS build a smart local fallback first
     final fallback = _smartLocalExtract(transcript);
@@ -188,472 +194,388 @@ Return ONLY this JSON, no other text, no markdown:
   // Smart local extraction — works for all Indian languages (public for use by other screens)
   Map<String, dynamic> smartLocalExtract(String text) => _smartLocalExtract(text);
 
+  // Public wrapper for testing
+  Map<String, dynamic> testLocalExtract(String text) => _smartLocalExtract(text);
+
   // Smart local extraction — works for all Indian languages
   Map<String, dynamic> _smartLocalExtract(String text) {
-    final t = text.toLowerCase();
-    final words = text.split(RegExp(r'[\s,।\.]+'));
-    print('SmartLocalExtract: Analyzing text in all languages');
+    // ── SETUP ─────────────────────────────────────────
+    final orig = text.trim();
+    // Normalize: remove zero-width chars, extra spaces
+    final clean = orig
+        .replaceAll('\u200b', '')
+        .replaceAll('\u200c', '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final lower = clean.toLowerCase();
 
-    // Name extraction — word after name patterns in all languages
+    print('╔═ _smartLocalExtract ════════════════════════╗');
+    print('║ Input: "$clean"');
+    print('╚═════════════════════════════════════════════╝');
+
+    // ── 1. NAME ───────────────────────────────────────
+    // Target: "माझे नाव चेतन आहे" → "चेतन"
+    // Strategy: find trigger word, take NEXT non-filler word
     String? name;
-    final namePatterns = [
-      // Hindi
-      'नाव', 'नाम', 'मेरा नाम', 'मेरा नाम है', 'मेरा नाम हैं',
-      // Marathi
-      'नाव', 'माझे नाव', 'माझे नाव आहे',
-      // English
-      'naam', 'name is', 'my name is', 'my name',
-      // Tamil
-      'என் பெயர்', 'பெயர்',
-      // Telugu
-      'నా పేరు', 'పేరు',
-      // Kannada
-      'ನನ್ನ ಹೆಸರು', 'ಹೆಸರು',
-      // Bengali
-      'আমার নাম', 'নাম',
-      // Gujarati
-      'મારું નામ', 'નામ',
-      // Malayalam
-      'എന്റെ പേര്', 'പേര്',
-      // Odia
-      'ମା', 'ନାମ',
-      // Punjabi
-      'ਮੇਰਾ ਨਾਮ', 'ਨਾਮ',
+
+    const nameTriggers = [
+      'माझे नाव', 'माझं नाव',   // Marathi
+      'मेरा नाम', 'मेरो नाम',   // Hindi
+      'my name is', 'name is',   // English
+      'நான் பெயர்', 'என் பெயர்', // Tamil
+      'నా పేరు', 'నా పేరు',      // Telugu
+      'ನನ್ನ ಹೆಸರು',              // Kannada
+      'আমার নাম',               // Bengali
+      'मारो नाम', 'मारू नाम',   // Gujarati
     ];
-    for (final pattern in namePatterns) {
-      final idx = t.indexOf(pattern);
-      if (idx >= 0) {
-        final afterPattern = text.substring(idx + pattern.length).trim();
-        final nameWords = afterPattern.split(RegExp(r'\s+'));
-        if (nameWords.isNotEmpty && nameWords[0].isNotEmpty) {
-          // Skip common words like "आहे", "है", "is", "आहे."
-          final skip = ['आहे', 'है', 'is', 'am', 'आहे.', 'हैं', 'हुँ', 'ஆகும்', 'అన్ని', 'ನಾನು', 'আমি', 'હું', 'ഞാൻ', 'ମ', 'ਮੈਂ'];
-          name = nameWords.firstWhere(
-            (w) => !skip.contains(w.toLowerCase()) && w.length > 1,
-            orElse: () => '',
-          );
-          if (name!.isEmpty) name = null;
-          print('SmartLocalExtract: Extracted name: $name from pattern: $pattern');
-        }
+
+    const nameFillers = {
+      'आहे', 'आहे.', 'है', 'है.', 'is', 'am', 'are',
+      'हूं', 'हूँ', 'हो', 'था', 'थी', 'ते',
+      'मी', 'मि', 'mi', 'the', 'a', 'an', 'my',
+      'माझे', 'माझं', 'मेरा', 'मेरो',
+    };
+
+    for (final trigger in nameTriggers) {
+      final idx = lower.indexOf(trigger.toLowerCase());
+      if (idx == -1) continue;
+
+      // Get text after the trigger
+      final afterTrigger = clean.substring(idx + trigger.length).trim();
+      final parts = afterTrigger.split(RegExp(r'\s+'));
+
+      for (final part in parts) {
+        final p = part.replaceAll(RegExp(r'[।,.!?]'), '').trim();
+        if (p.isEmpty) continue;
+        if (nameFillers.contains(p.toLowerCase())) continue;
+        if (p.length < 2) continue;
+        // Likely a name — take it
+        name = p;
+        break;
+      }
+      if (name != null) break;
+    }
+
+    print('NAME: $name');
+
+    // ── 2. OCCUPATION ─────────────────────────────────
+    // Check BEFORE gender because Marathi verbs are gendered
+    String? occupation;
+
+    // Order matters: more specific first
+    const occupationKeywords = <String, List<String>>{
+      'student': [
+        'विद्यार्थी', 'विद्यार्थि',    // Marathi/Hindi
+        'student', 'students',
+        'शाळा', 'शाळेत',              // Marathi school
+        'कॉलेज', 'college',
+        'दहावी', 'दहावीच्या',          // 10th Marathi
+        'बारावी', 'बारावीच्या',         // 12th Marathi
+        'दसवीं', '10वीं',              // Hindi 10th
+        'बारहवीं', '12वीं',
+        '10th', '12th', 'ssc', 'hsc',
+        'शिकतो', 'शिकते', 'शिकतोय',   // Marathi "studying"
+        'शिकत', 'पढ़ता', 'पढ़ती',       // Hindi
+        'पदवीधर', 'graduate',
+        'vidyarthi',
+      ],
+      'farmer': [
+        'शेतकरी', 'शेतकरि',
+        'किसान', 'farmer',
+        'शेती', 'शेत', 'खेती', 'खेत',
+        'రైతు', 'விவசாயி', 'ರೈತ', 'কৃষক',
+        'kisan',
+      ],
+      'daily_wage': [
+        'मजूर', 'मजुर', 'मजदूर',
+        'labour', 'laborer', 'worker',
+        'कामगार',
+        'కూలీ', 'தொழிலாளி',
+      ],
+      'business': [
+        'व्यवसाय', 'व्यापार',
+        'business', 'shop', 'दुकान', 'दुकानदार',
+        'వ్యాపారం', 'வியாபாரம்',
+      ],
+      'government': [
+        'सरकारी', 'government', 'govt',
+        'नोकरी', 'job', 'service',
+        'அரசு', 'అరసు',
+      ],
+      'unemployed': [
+        'बेरोजगार', 'unemployed',
+        'नोकरी नाही', 'काम नाही',
+        'வேலையில்லா',
+      ],
+    };
+
+    for (final entry in occupationKeywords.entries) {
+      final found = entry.value.any((kw) =>
+          lower.contains(kw.toLowerCase()));
+      if (found) {
+        occupation = entry.key;
+        print('OCCUPATION: $occupation');
         break;
       }
     }
 
-    // Age extraction — improved regex patterns for all languages
-    int? age;
-    // Look for number followed by age-related words in multiple languages
-    final ageRegexes = [
-      // Hindi: "35 साल", "35 वर्ष"
-      RegExp(r'(\d{1,3})\s*(?:साल|वर्ष|वर्षों|साल का|वर्ष का)'),
-      // Marathi: "35 वर्ष", "35 वय"
-      RegExp(r'(\d{1,3})\s*(?:वर्ष|वय|वर्षांचा|वर्षाचा)'),
-      // English: "35 years", "35 yrs"
-      RegExp(r'(\d{1,3})\s*(?:years?|yrs?|year old|years old)'),
-      // Tamil: "35 வயது"
-      RegExp(r'(\d{1,3})\s*(?:வயது|வயதில்|வயஸு)'),
-      // Telugu: "35 సంవత్సరాలు"
-      RegExp(r'(\d{1,3})\s*(?:సంవత్సరాలు|సంవత్సరం|యేళ్ళు)'),
-      // Kannada: "35 ವರ್ಷ"
-      RegExp(r'(\d{1,3})\s*(?:ವರ್ಷ|ವಯಸ್ಸು|ವರ್ಷಗಳು)'),
-      // Bengali: "35 বছর"
-      RegExp(r'(\d{1,3})\s*(?:বছর|বছরের|বয়স)'),
-      // Gujarati: "35 વર્ષ"
-      RegExp(r'(\d{1,3})\s*(?:વર્ષ|વય|વર્ષનો)'),
-      // Malayalam: "35 വയസ്സ്"
-      RegExp(r'(\d{1,3})\s*(?:വയസ്സ്|വയസ്|വയ്യസ്സ്)'),
-      // Odia: "35 ବର୍ଷ"
-      RegExp(r'(\d{1,3})\s*(?:ବର୍ଷ|ବୟସ)'),
-      // Punjabi: "35 ਸਾਲ"
-      RegExp(r'(\d{1,3})\s*(?:ਸਾਲ|ਵਰ੍ਹੇ|ਉਮਰ)'),
+    // ── 3. EDUCATION ──────────────────────────────────
+    String? education;
+
+    if ([
+      'दहावी', 'दहावीच्या', 'दहावीचे', '10th', '10वी', '10वीं',
+      'बारावी', 'बारावीच्या', '12th', '12वी', '12वीं',
+      'ssc', 'hsc', 'school', 'शाळा', 'माध्यमिक',
+      'मराठी माध्यम', 'english medium', 'semi english',
+    ].any((k) => lower.contains(k.toLowerCase()))) {
+      education = 'secondary';
+    } else if ([
+      'पदवी', 'graduate', 'college', 'university',
+      'बीए', 'b.a', 'bsc', 'bcom', 'engineering',
+      'इंजिनिअरिंग', 'पदव्युत्तर', 'postgraduate',
+    ].any((k) => lower.contains(k.toLowerCase()))) {
+      education = 'graduate';
+    } else if ([
+      'primary', 'प्राथमिक', '5th', '7th', '8th',
+    ].any((k) => lower.contains(k.toLowerCase()))) {
+      education = 'primary';
+    }
+
+    print('EDUCATION: $education');
+
+    // ── 4. GENDER ─────────────────────────────────────
+    // Marathi is grammatically gendered — verbs tell us
+    String? gender;
+
+    // Male verb forms in Marathi: राहतो, शिकतो, करतो, जातो
+    const maleIndicators = [
+      'राहतो', 'शिकतो', 'करतो', 'जातो', 'येतो',  // Marathi male verbs
+      'आहे मी', // generic but with male context
+      'मुलगा', 'boy', 'भाऊ', 'brother',
+      'बाबा', 'father', 'अण्णा',
+      'అతను', 'ಅವನು', 'அவன்',
     ];
-    for (final regex in ageRegexes) {
-      final ageMatch = regex.firstMatch(t);
-      if (ageMatch != null) {
-        age = int.tryParse(ageMatch.group(1) ?? '');
-        if (age != null && age > 0 && age < 120) {
-          print('SmartLocalExtract: Extracted age: $age');
+
+    const femaleIndicators = [
+      'राहते', 'शिकते', 'करते', 'जाते', 'येते', // Marathi female verbs
+      'विधवा', 'widow',
+      'गर्भवती', 'pregnant',
+      'महिला', 'woman', 'बाई', 'ताई',
+      'मुलगी', 'girl', 'बहीण', 'sister',
+      'आई', 'mother', 'ती', 'तिचे', 'तिला',
+      'amma', 'ఆమె', 'ಅವಳು',
+    ];
+
+    if (femaleIndicators.any((k) => lower.contains(k.toLowerCase()))) {
+      gender = 'female';
+    } else if (maleIndicators.any((k) => lower.contains(k.toLowerCase()))) {
+      gender = 'male';
+    }
+
+    print('GENDER: $gender');
+
+    // ── 5. STATE ──────────────────────────────────────
+    String? state;
+
+    // Key: include locative forms like "महाराष्ट्रात" (in Maharashtra)
+    const stateKeywords = <String, List<String>>{
+      'Maharashtra': [
+        'महाराष्ट्र', 'महाराष्ट्रात', 'महाराष्ट्राच्या',
+        'maharashtra',
+      ],
+      'Uttar Pradesh': [
+        'उत्तर प्रदेश', 'uttar pradesh', 'यूपी', 'up ',
+      ],
+      'Bihar': ['बिहार', 'bihar'],
+      'Rajasthan': ['राजस्थान', 'rajasthan'],
+      'Madhya Pradesh': ['मध्य प्रदेश', 'madhya pradesh'],
+      'Gujarat': ['गुजरात', 'gujarat', 'ગુજરાત'],
+      'Karnataka': ['कर्नाटक', 'karnataka', 'ಕರ್ನಾಟಕ'],
+      'Tamil Nadu': ['तमिलनाडु', 'tamil nadu', 'தமிழ்நாடு'],
+      'Andhra Pradesh': ['आंध्र प्रदेश', 'andhra', 'ఆంధ్రప్రదేశ్'],
+      'Telangana': ['तेलंगाना', 'telangana', 'తెలంగాణ'],
+      'West Bengal': ['पश्चिम बंगाल', 'west bengal', 'পশ্চিমবঙ্গ'],
+      'Punjab': ['पंजाब', 'punjab', 'ਪੰਜਾਬ'],
+      'Kerala': ['केरल', 'kerala'],
+      'Odisha': ['ओडिशा', 'odisha'],
+      'Haryana': ['हरियाणा', 'haryana'],
+      'Chhattisgarh': ['छत्तीसगढ़', 'chhattisgarh'],
+      'Jharkhand': ['झारखंड', 'jharkhand'],
+      'Assam': ['असम', 'assam'],
+    };
+
+    for (final entry in stateKeywords.entries) {
+      if (entry.value.any((kw) => lower.contains(kw.toLowerCase()))) {
+        state = entry.key;
+        print('STATE: $state');
+        break;
+      }
+    }
+
+    // ── 6. ANNUAL INCOME ──────────────────────────────
+    int? annualIncome;
+
+    // Map word-numbers in Marathi, Hindi, English
+    // Note: Using final (not const) because Marathi/Hindi share some words
+    final wordToNum = <String, int>{
+      // Marathi (unique words first)
+      'दोन': 2, 'नऊ': 9, 'दहा': 10,
+      'वीस': 20, 'पन्नास': 50,
+      // Hindi (unique words)
+      'दो': 2, 'पाँच': 5, 'छह': 6, 'नौ': 9, 'दस': 10,
+      'बीस': 20, 'पचास': 50,
+      // Shared Marathi/Hindi words
+      'एक': 1, 'तीन': 3, 'चार': 4, 'सात': 7, 'आठ': 8,
+      'तीस': 30,
+      // English
+      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+      'twenty': 20, 'thirty': 30, 'fifty': 50,
+    };
+
+    // Try: digit + lakh  →  "2 lakh", "2.5 lakh"
+    final digitLakh = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(?:lakh|लाख|लख|లక్ష|லட்சம்|ಲಕ್ಷ|লাখ)',
+      caseSensitive: false,
+    );
+    var m = digitLakh.firstMatch(lower);
+    if (m != null) {
+      final n = double.tryParse(m.group(1) ?? '');
+      if (n != null && n > 0) {
+        annualIncome = (n * 100000).round();
+        print('INCOME (digit lakh): $annualIncome');
+      }
+    }
+
+    // Try: word + lakh  →  "एक लाख", "दोन लाख"
+    if (annualIncome == null) {
+      for (final entry in wordToNum.entries) {
+        final pattern = RegExp(
+          '${RegExp.escape(entry.key)}\\s*(?:lakh|लाख|लख)',
+          caseSensitive: false,
+        );
+        if (pattern.hasMatch(lower)) {
+          annualIncome = entry.value * 100000;
+          print('INCOME (word lakh "${entry.key}"): $annualIncome');
           break;
         }
       }
     }
-    // Fallback: look for standalone age patterns like "umr 35" or "age 35"
-    if (age == null) {
-      final fallbackRegex = RegExp(r'(?:umr|age|वय|उम्र|वयो)[\s:]+(\d{1,3})', caseSensitive: false);
-      final match = fallbackRegex.firstMatch(t);
-      if (match != null) {
-        age = int.tryParse(match.group(1) ?? '');
-        if (age != null && age > 0 && age < 120) {
-          print('SmartLocalExtract: Extracted age (fallback): $age');
+
+    // Try: plain digit near income keyword  →  "उत्पन्न 50000"
+    if (annualIncome == null) {
+      final incomeKeyword = RegExp(
+        r'(?:उत्पन्न|income|आय|कमाई|वेतन|salary|పాప|வருமான)'
+        r'\s+(?:is\s+|आहे\s+|है\s+)?(\d[\d,]+)',
+        caseSensitive: false,
+      );
+      final km = incomeKeyword.firstMatch(lower);
+      if (km != null) {
+        final n = int.tryParse((km.group(1) ?? '').replaceAll(',', ''));
+        if (n != null && n >= 1000) {
+          annualIncome = n;
+          print('INCOME (keyword): $annualIncome');
         }
       }
     }
 
-    // Occupation detection — patterns in all languages
-    String? occupation;
-    // Student patterns
-    if (t.contains('विद्यार्थी') || t.contains('student') ||
-        t.contains('शाळा') || t.contains('कॉलेज') || t.contains('school') || t.contains('college') ||
-        t.contains('10th') || t.contains('12th') || t.contains('10वी') || t.contains('12वी') ||
-        t.contains('दहावी') || t.contains('बारावी') ||
-        // Tamil
-        t.contains('மாணவர்') || t.contains('பள்ளி') || t.contains('கல்லூரி') ||
-        // Telugu
-        t.contains('విద్యార్థి') || t.contains('పాఠశాల') || t.contains('కళాశాల') ||
-        // Kannada
-        t.contains('ವಿದ್ಯಾರ್ಥಿ') || t.contains('ಶಾಲೆ') || t.contains('ಕಾಲೇಜ್') ||
-        // Bengali
-        t.contains('ছাত্র') || t.contains('স্কুল') || t.contains('কলেজ') ||
-        // Gujarati
-        t.contains('વિદ્યાર્થી') || t.contains('શાળા') || t.contains('કૉલેજ') ||
-        // Malayalam
-        t.contains('വിദ്യാർത്ഥി') || t.contains('സ്കൂൾ') || t.contains('കോളേജ്') ||
-        // Odia
-        t.contains('ଛାତ') || t.contains('ିଦାଳ') || t.contains('କଲେଜ') ||
-        // Punjabi
-        t.contains('ਵਿਦਿਆਰਥੀ') || t.contains('ਸਕੂਲ') || t.contains('ਕਾਲਜ')) {
-      occupation = 'student';
-      print('SmartLocalExtract: Detected occupation: student');
-    }
-    // Farmer patterns
-    else if (t.contains('शेतकरी') || t.contains('किसान') || t.contains('farmer') || t.contains('शेती') ||
-        // Tamil
-        t.contains('விவசாயி') || t.contains('வேளாண்') ||
-        // Telugu
-        t.contains('రైతు') || t.contains('రైతువాడు') ||
-        // Kannada
-        t.contains('ರೈತ') || t.contains('ಕೃಷಿಕ') ||
-        // Bengali
-        t.contains('কৃষক') || t.contains('চাষা') ||
-        // Gujarati
-        t.contains('ખેડૂત') || t.contains('કિસાન') ||
-        // Malayalam
-        t.contains('കർഷികൻ') || t.contains('കൃഷി') ||
-        // Odia
-        t.contains('ଚାଷା') || t.contains('କୃଷକ') ||
-        // Punjabi
-        t.contains('ਕਿਸਾਨ') || t.contains('ਕਿਸਾਨੀ')) {
-      occupation = 'farmer';
-      print('SmartLocalExtract: Detected occupation: farmer');
-    }
-    // Daily wage/labour patterns
-    else if (t.contains('मजदूर') || t.contains('मजूर') || t.contains('labour') || t.contains('labor') ||
-        t.contains('worker') || t.contains('कामगार') ||
-        // Tamil
-        t.contains('தொழிலாளி') || t.contains('கூலி') ||
-        // Telugu
-        t.contains('కూలీ') || t.contains('కార్మికుడు') ||
-        // Kannada
-        t.contains('ಕೂಲಿ') || t.contains('ಕಾರ್ಮಿಕರ್') ||
-        // Bengali
-        t.contains('শ্রমিক') || t.contains('কাজ') ||
-        // Gujarati
-        t.contains('મજૂર') || t.contains('કામદાર') ||
-        // Malayalam
-        t.contains('തൊഴിലാളി') || t.contains('വേല') ||
-        // Odia
-        t.contains('ଶର') || t.contains('ାର') ||
-        // Punjabi
-        t.contains('ਮਜਦੂਰ') || t.contains('ਮਜ਼ਦੂਰ')) {
-      occupation = 'daily_wage';
-      print('SmartLocalExtract: Detected occupation: daily_wage');
-    }
-    // Business patterns
-    else if (t.contains('व्यवसाय') || t.contains('business') || t.contains('दुकान') || t.contains('shop') ||
-        // Tamil
-        t.contains('வணிகம்') || t.contains('கடை') ||
-        // Telugu
-        t.contains('వ్యాపారం') || t.contains('దుకాను') ||
-        // Kannada
-        t.contains('ವ್ಯಾಪಾರ') || t.contains('ಅಂಗಡಿ') ||
-        // Bengali
-        t.contains('ব্যবসা') || t.contains('দোকান') ||
-        // Gujarati
-        t.contains('વ્યવસાય') || t.contains('દુકાન') ||
-        // Malayalam
-        t.contains('വ്യാപാരം') || t.contains('കട') ||
-        // Odia
-        t.contains('ସା') || t.contains('ିକ') ||
-        // Punjabi
-        t.contains('ਵਪਾਰ') || t.contains('ਦੁਕਾਨ')) {
-      occupation = 'business';
-      print('SmartLocalExtract: Detected occupation: business');
-    }
-    // Government patterns
-    else if (t.contains('सरकारी') || t.contains('government') || t.contains('govt') ||
-        // Tamil
-        t.contains('அரசு') ||
-        // Telugu
-        t.contains('ప్రభుత్వ') ||
-        // Kannada
-        t.contains('ಸರ್ಕಾರ') ||
-        // Bengali
-        t.contains('সরকার') ||
-        // Gujarati
-        t.contains('સરકાર') ||
-        // Malayalam
-        t.contains('സർകാർ') ||
-        // Odia
-        t.contains('ସରକାର') ||
-        // Punjabi
-        t.contains('ਸਰਕਾਰ')) {
-      occupation = 'government';
-      print('SmartLocalExtract: Detected occupation: government');
-    }
+    // ── 7. AGE ────────────────────────────────────────
+    int? age;
 
-    // Education detection — patterns in all languages
-    String? education;
-    // Secondary education (10th/12th/school)
-    if (t.contains('दहावी') || t.contains('10th') || t.contains('10वी') ||
-        t.contains('बारावी') || t.contains('12th') || t.contains('12वी') ||
-        t.contains('शाळा') || t.contains('school') ||
-        // Tamil
-        t.contains('10ம்') || t.contains('12ம்') || t.contains('பள்ளி') ||
-        // Telugu
-        t.contains('10వ') || t.contains('12వ') || t.contains('పాఠశాల') ||
-        // Kannada
-        t.contains('10ನೇ') || t.contains('12ನೇ') || t.contains('ಶಾಲೆ') ||
-        // Bengali
-        t.contains('দশম') || t.contains('দ্বাদশ') || t.contains('স্কুল') ||
-        // Gujarati
-        t.contains('10મા') || t.contains('12મા') || t.contains('શાળા') ||
-        // Malayalam
-        t.contains('10ാം') || t.contains('12ാം') || t.contains('സ്കൂൾ') ||
-        // Odia
-        t.contains('ାଷ') || t.contains('ବବାଦଶ') || t.contains('ବିଦଭାଳ') ||
-        // Punjabi
-        t.contains('10ਵਾਂ') || t.contains('12ਵਾਂ') || t.contains('ਸਕੂਲ')) {
-      education = 'secondary';
-      print('SmartLocalExtract: Detected education: secondary');
-    }
-    // Graduate education (college/university)
-    else if (t.contains('पदवी') || t.contains('graduate') || t.contains('college') || t.contains('university') ||
-        // Tamil
-        t.contains('பட்டம்') || t.contains('கல்லூரி') || t.contains('பல்கலை') ||
-        // Telugu
-        t.contains('డిగ్రీ') || t.contains('కళాశాల') || t.contains('విశ్వవిద్యాలయం') ||
-        // Kannada
-        t.contains('ಪದವಿ') || t.contains('ಕಾಲೇಜ್') || t.contains('ವಿಶ್ವವಿದ್ಯಾಲಯ') ||
-        // Bengali
-        t.contains('স্নাতক') || t.contains('কলেজ') || t.contains('বিশ্ববিদ্যালয') ||
-        // Gujarati
-        t.contains('પદવી') || t.contains('કૉલેજ') || t.contains('યુનિવર્સિટી') ||
-        // Malayalam
-        t.contains('ബിരുദ') || t.contains('കോളേജ്') || t.contains('സർവകലാശാല') ||
-        // Odia
-        t.contains('ସନ') || t.contains('ବିଦାଳ') || t.contains('ିଦ୍୯ାଳୟ') ||
-        // Punjabi
-        t.contains('ਗ੍ਰੈਜੂਏਟ') || t.contains('ਕਾਲਜ') || t.contains('ਯੂਨੀਵਰਸਿਟੀ')) {
-      education = 'graduate';
-      print('SmartLocalExtract: Detected education: graduate');
-    }
-
-    // Gender detection — patterns in all languages
-    String? gender;
-    if (t.contains('विधवा') || t.contains('widow') ||
-        t.contains('गर्भवती') || t.contains('pregnant') ||
-        t.contains('महिला') || t.contains('woman') || t.contains('female') ||
-        // Tamil
-        t.contains('விதவை') || t.contains('கர்ப்பமான') || t.contains('பெண்') ||
-        // Telugu
-        t.contains('విధవ') || t.contains('గర్భిణి') || t.contains('మహిళ') ||
-        // Kannada
-        t.contains('ವಿಧವೆ') || t.contains('ಗರ್ಭಿಣಿ') || t.contains('ಮಹಿಳೆ') ||
-        // Bengali
-        t.contains('বিধবা') || t.contains('গর্ভবতী') || t.contains('মহিলা') ||
-        // Gujarati
-        t.contains('વિધવા') || t.contains('ગર્ભવતી') || t.contains('મહિલા') ||
-        // Malayalam
-        t.contains('വിധവ') || t.contains('ഗർഭിണി') || t.contains('സ്ത്രീ') ||
-        // Odia
-        t.contains('ବା') || t.contains('') || t.contains('ମହିଲା') ||
-        // Punjabi
-        t.contains('ਵਿਧਵਾ') || t.contains('ਗਰਭਵਤੀ') || t.contains('ਔਰਤ')) {
-      gender = 'female';
-      print('SmartLocalExtract: Detected gender: female');
-    }
-
-    // Boolean flags — patterns in all languages
-    final isWidow = t.contains('विधवा') || t.contains('widow') ||
-        // Tamil
-        t.contains('விதவை') ||
-        // Telugu
-        t.contains('విధవ') ||
-        // Kannada
-        t.contains('ವಿಧವೆ') ||
-        // Bengali
-        t.contains('বিধবা') ||
-        // Gujarati
-        t.contains('વિધવા') ||
-        // Malayalam
-        t.contains('വിധവ') ||
-        // Odia
-        t.contains('ବବ') ||
-        // Punjabi
-        t.contains('ਵਿਧਵਾ');
-
-    final isPregnant = t.contains('गर्भवती') || t.contains('pregnant') ||
-        // Tamil
-        t.contains('கர்ப்பமான') ||
-        // Telugu
-        t.contains('గర్భిణి') ||
-        // Kannada
-        t.contains('ಗರ್ಭಿಣಿ') ||
-        // Bengali
-        t.contains('গর্ভবতী') ||
-        // Gujarati
-        t.contains('ગર્ભવતી') ||
-        // Malayalam
-        t.contains('ഗർഭിണി') ||
-        // Odia
-        t.contains('') ||
-        // Punjabi
-        t.contains('ਗਰਭਵਤੀ');
-
-    final isDisabled = t.contains('अपंग') || t.contains('दिव्यांग') || t.contains('disabled') ||
-        t.contains('handicap') ||
-        // Tamil
-        t.contains('ஊனமுற்றிய') || t.contains('ஊனமை') ||
-        // Telugu
-        t.contains('వికలాంగుడు') ||
-        // Kannada
-        t.contains('ದೈಹಿಕ ಅಂಗವೈಕಲ್ಯ') ||
-        // Bengali
-        t.contains('প্রতিবন্ধী') ||
-        // Gujarati
-        t.contains('અપંગ') ||
-        // Malayalam
-        t.contains('ശാരീരിക്കമുള്ള') ||
-        // Odia
-        t.contains('') ||
-        // Punjabi
-        t.contains('ਅਪੰਾਂਗ');
-
-    final hasBpl = t.contains('बीपीएल') || t.contains('bpl') || t.contains('रेशन') ||
-        t.contains('ration') ||
-        // Tamil
-        t.contains('ரேஷன்') ||
-        // Telugu
-        t.contains('రేషన్') ||
-        // Kannada
-        t.contains('ರೇಷನ್') ||
-        // Bengali
-        t.contains('রেশন') ||
-        // Gujarati
-        t.contains('રેશન') ||
-        // Malayalam
-        t.contains('റേഷൻ') ||
-        // Odia
-        t.contains('') ||
-        // Punjabi
-        t.contains('ਰੇਸ਼ਨ');
-
-    final hasAadhar = t.contains('आधार') || t.contains('aadhar') || t.contains('aadhaar') ||
-        // Tamil
-        t.contains('ஆதார்') ||
-        // Telugu
-        t.contains('ఆధార్') ||
-        // Kannada
-        t.contains('ಆಧಾರ್') ||
-        // Bengali
-        t.contains('আধার') ||
-        // Gujarati
-        t.contains('આધાર') ||
-        // Malayalam
-        t.contains('ആധാർ') ||
-        // Odia
-        t.contains('') ||
-        // Punjabi
-        t.contains('ਆਧਾਰ');
-
-    // Caste detection — patterns in all languages
-    String? caste;
-    if (t.contains('sc') || t.contains('scheduled caste') || t.contains('अनुसूचित जाति') ||
-        t.contains('अनुसूचित') || t.contains('scheduled') ||
-        t.contains('அட்டவணை சாதி') || t.contains('అనుసూచిత కులం') ||
-        t.contains('ಅನುಸೂಚಿತ ಜಾತಿ') || t.contains('অনুসূচিত জাতি') ||
-        t.contains('અનુસૂચિત જાતિ') || t.contains('അനുസൂചിത ജാതി') ||
-        t.contains('ଅନୁସୂଚିତ ଜାତି') || t.contains('ਅਨੁਸੂਚਿਤ ਜਾਤਿ')) {
-      caste = 'sc';
-      print('SmartLocalExtract: Detected caste: SC');
-    } else if (t.contains('st') || t.contains('scheduled tribe') || t.contains('अनुसूचित जनजाति') ||
-               t.contains('जनजाति') || t.contains('tribe') ||
-               t.contains('அட்டவணை பழங்குடி') || t.contains('అనుసూచిత గిరిజనులు') ||
-               t.contains('ಅನುಸೂಚಿತ ಪಂಗಡ') || t.contains('অনুসূচিত উপজাতি') ||
-               t.contains('અનુસૂચિત જનજાતિ') || t.contains('അനുസൂചിത വർഗം') ||
-               t.contains('ଅନୁସୂଚିତ ଜନଜାତି') || t.contains('ਅਨੁਸੂਚਿਤ ਜਨਜਾਤਿ')) {
-      caste = 'st';
-      print('SmartLocalExtract: Detected caste: ST');
-    } else if (t.contains('obc') || t.contains('other backward class') || t.contains('अन्य पिछड़ा वर्ग') ||
-               t.contains('पिछड़ा') || t.contains('backward') ||
-               t.contains('பிற பிற்படுத்தப்பட்ட வகுப்பு') || t.contains('ఇతర వెనుకబడిన తరగతి') ||
-               t.contains('ಇತರ ಹಿಂದುಳಿದ ವರ್ಗ') || t.contains('অন্যান্য পিছিয়ে শ্রেণী') ||
-               t.contains('અન્ય પછાત વર્ગ') || t.contains('മറ്റു പിന്നോക്ക വിഭാഗം') ||
-               t.contains('ଅନ୍ୟାନ୍ୟ ପଛୁଆ ବର୍ଗ') || t.contains('ਅਨ ਪਛੜਾ ਵਰਗ')) {
-      caste = 'obc';
-      print('SmartLocalExtract: Detected caste: OBC');
-    } else if (t.contains('general') || t.contains('सामान्य') || t.contains('open') ||
-               t.contains('பொது') || t.contains('సాధారణ') ||
-               t.contains('ಸಾಮಾನ್ಯ') || t.contains('সাধারণ') ||
-               t.contains('સામાન્ય') || t.contains('സാധാരണ') ||
-               t.contains('ସାଧାରଣ') || t.contains('ਆਮ')) {
-      caste = 'general';
-      print('SmartLocalExtract: Detected caste: General');
-    }
-
-    // Income extraction — patterns for detecting annual income
-    int? annualIncome;
-    final incomeRegexes = [
-      // Hindi: "2 लाख", "200000", "2 lakh"
-      RegExp(r'(\d{1,2})\s*(?:लाख|लाखों)'),
-      RegExp(r'(\d{5,7})\s*(?:रुपये|रु|₹|rs\.?|rupees?)'),
-      // English: "2 lakh", "200000", "2.5 lakh"
-      RegExp(r'(\d{1,2}(?:\.\d)?)\s*(?:lakh|lac)'),
-      RegExp(r'(\d{5,7})\s*(?:rs\.?|rupees?|₹)'),
-      // Marathi: "2 लाख"
-      RegExp(r'(\d{1,2})\s*(?:लाख)'),
-      // Tamil: "2 லட்சம்"
-      RegExp(r'(\d{1,2})\s*(?:லட்சம்)'),
-      // Telugu: "2 లక్షలు"
-      RegExp(r'(\d{1,2})\s*(?:లక్షలు|లక్ష)'),
-      // Bengali: "2 লক্ষ"
-      RegExp(r'(\d{1,2})\s*(?:লক্ষ)'),
+    final agePatterns = [
+      // "45 वर्ष", "45 years", "45 साल", "45 वर्षांचा/ची"
+      RegExp(
+        r'(\d{1,3})\s*(?:वर्ष|वर्षांचा|वर्षांची|वर्षाचा|वर्षाची|'
+        r'years?|साल|वय|yr|yrs|సంవత్సరాలు|வயது|ವರ್ಷ|বছর)',
+        caseSensitive: false,
+      ),
+      // "वय 45", "age 45"
+      RegExp(
+        r'(?:वय|age|उम्र|आयु)\s+(\d{1,3})',
+        caseSensitive: false,
+      ),
     ];
-    for (final regex in incomeRegexes) {
-      final match = regex.firstMatch(t);
-      if (match != null) {
-        final value = match.group(1);
-        if (value != null) {
-          final numValue = double.tryParse(value);
-          if (numValue != null) {
-            // If value is small (like 2, 5), assume it's in lakhs and convert
-            if (numValue < 10) {
-              annualIncome = (numValue * 100000).toInt();
-            } else {
-              annualIncome = numValue.toInt();
-            }
-            print('SmartLocalExtract: Extracted annual income: $annualIncome');
-            break;
-          }
+
+    for (final p in agePatterns) {
+      final am = p.firstMatch(lower);
+      if (am != null) {
+        // Try group 1 first, then group 2
+        final numStr = am.group(1) ?? am.group(2);
+        final a = int.tryParse(numStr ?? '');
+        if (a != null && a >= 5 && a <= 100) {
+          age = a;
+          print('AGE: $age');
+          break;
         }
       }
     }
 
-    // Bank account detection
-    final hasBankAccount = t.contains('bank') || t.contains('बैंक') || t.contains('बँक') ||
-        t.contains('account') || t.contains('खाता') || t.contains('खाते') ||
-        t.contains('passbook') || t.contains('पासबुक') || t.contains('passbook') ||
-        t.contains('உங்க खाता') || t.contains('బ్యాంకు') ||
-        t.contains('ಬ್ಯಾಂಕ್') || t.contains('ব্যাংক') ||
-        t.contains('બેંક') || t.contains('ബാങ്ക്') ||
-        t.contains('ବ୍ୟାଙ୍କ') || t.contains('ਬੈਂਕ');
+    // ── 8. CASTE ─────────────────────────────────────
+    String? caste;
 
-    print('SmartLocalExtract: name=$name, age=$age, gender=$gender, occupation=$occupation, caste=$caste, income=$annualIncome, isWidow=$isWidow, isPregnant=$isPregnant, isDisabled=$isDisabled, hasBpl=$hasBpl, hasAadhar=$hasAadhar, hasBank=$hasBankAccount');
+    const casteKeywords = <String, List<String>>{
+      'sc': ['sc', 'scheduled caste', 'अनुसूचित जाती', 'दलित', 'महार', 'मांग'],
+      'st': ['st', 'scheduled tribe', 'अनुसूचित जमाती', 'आदिवासी', 'tribal'],
+      'obc': ['obc', 'other backward', 'ओबीसी', 'इतर मागास', 'माळी', 'कुणबी'],
+      'general': ['general', 'open', 'खुला', 'सामान्य', 'ब्राह्मण', 'मराठा'],
+      'minority': ['minority', 'अल्पसंख्यांक', 'muslim', 'christian', 'मुस्लिम'],
+    };
 
-    return {
+    for (final entry in casteKeywords.entries) {
+      if (entry.value.any((k) => lower.contains(k.toLowerCase()))) {
+        caste = entry.key;
+        print('CASTE: $caste');
+        break;
+      }
+    }
+
+    // ── 9. BOOLEAN FLAGS ──────────────────────────────
+    final isWidow = [
+      'विधवा', 'widow', 'पतीचे निधन', 'नवरा गेला',
+      'husband died', 'husband passed',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    final isPregnant = [
+      'गर्भवती', 'pregnant', 'गर्भ', 'बाळंत', 'प्रसूती',
+      'గర్భిణి', 'கர்ப்பிணி',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    final isDisabled = [
+      'अपंग', 'दिव्यांग', 'disabled', 'disability',
+      'wheelchair', 'अंध', 'बहिरे', 'व्यंग',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    final hasBpl = [
+      'बीपीएल', 'bpl', 'रेशन', 'गरीब रेषा', 'ration card',
+      'below poverty', 'दारिद्र्य रेषा',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    final hasAadhar = [
+      'आधार', 'aadhar', 'aadhaar', 'uid',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    final hasBankAccount = [
+      'बँक', 'bank', 'खाते', 'account', 'बचत', 'savings',
+    ].any((k) => lower.contains(k.toLowerCase()));
+
+    // ── 10. FAMILY SIZE ───────────────────────────────
+    int? familySize;
+    final familyRegex = RegExp(
+      r'(\d+)\s*(?:जण|members?|सदस्य|लोक|जना|माणसे)',
+      caseSensitive: false,
+    );
+    final fm = familyRegex.firstMatch(lower);
+    if (fm != null) {
+      familySize = int.tryParse(fm.group(1) ?? '');
+      print('FAMILY SIZE: $familySize');
+    }
+
+    // ── COMPILE RESULT ────────────────────────────────
+    final result = <String, dynamic>{
       'name': name,
       'age': age,
       'gender': gender,
-      'state': null,
+      'state': state,
       'district': null,
       'caste': caste,
       'occupation': occupation,
@@ -664,12 +586,22 @@ Return ONLY this JSON, no other text, no markdown:
       'has_bpl_card': hasBpl ? true : null,
       'has_aadhar': hasAadhar ? true : null,
       'has_bank_account': hasBankAccount ? true : null,
-      'family_size': null,
+      'family_size': familySize,
       'children_ages': <int>[],
       'is_pregnant': isPregnant,
       'education_level': education,
-      '_raw_transcript': text,
+      '_raw_transcript': orig,
     };
+
+    // Count extracted fields
+    final extracted = result.entries
+        .where((e) => e.key != '_raw_transcript' && e.value != null
+            && e.value != false && e.value != 0.0 && e.value != <int>[])
+        .map((e) => '${e.key}=${e.value}')
+        .join(', ');
+    print('EXTRACTED: $extracted');
+
+    return result;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -732,8 +664,11 @@ Expected JSON array:
     required String languageCode,
     List<Map<String, String>> history = const [],
   }) async {
-    print('AiChat.chat() called');
+    print('╔══════════════════════════════════════╗');
+    print('║  GeminiService.chat() CALLED          ║');
+    print('╚══════════════════════════════════════╝');
     print('API key empty: ${apiKey.isEmpty}');
+    print('API key length: ${apiKey.length}');
     print('Language: $languageCode');
     print('Message: $message');
 
@@ -742,10 +677,12 @@ Expected JSON array:
     print('Has internet: $hasNet');
 
     if (!hasNet) {
+      print('ERROR: No internet connection');
       return _localizedOfflineMessage(languageCode);
     }
 
     if (apiKey.isEmpty) {
+      print('ERROR: API key is empty');
       return _localizedNoKeyMessage(languageCode);
     }
 
@@ -787,6 +724,9 @@ Expected JSON array:
       final url =
           '${ApiEndpoints.geminiBaseUrl}/models/${ApiEndpoints.geminiModel}:generateContent?key=$apiKey';
 
+      print('Making HTTP POST to: ${ApiEndpoints.geminiBaseUrl}/models/${ApiEndpoints.geminiModel}:generateContent');
+      print('Request body contents length: ${contents.length}');
+
       final response = await _dio.post(url, data: {
         'contents': contents,
         'generationConfig': {
@@ -795,19 +735,22 @@ Expected JSON array:
         },
       }).timeout(const Duration(seconds: 30));
 
-      print('Gemini chat HTTP ${response.statusCode}');
+      print('Gemini chat HTTP status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = response.data;
-        return data['candidates'][0]['content']['parts'][0]['text']
-            as String;
+        final reply = data['candidates'][0]['content']['parts'][0]['text'] as String;
+        print('Gemini reply received: ${reply.substring(0, reply.length > 100 ? 100 : reply.length)}...');
+        return reply;
       } else {
-        print('Gemini chat error: ${response.data}');
+        print('Gemini chat error response: ${response.data}');
         return _localizedErrorMessage(languageCode);
       }
 
     } on DioException catch (e) {
       print('Gemini chat DioException: ${e.message}');
+      print('DioException type: ${e.type}');
+      print('DioException response: ${e.response}');
       return _localizedErrorMessage(languageCode);
     } catch (e) {
       print('Gemini chat exception: $e');
@@ -957,25 +900,25 @@ Expected JSON array:
   }
 
   Map<String, dynamic> _getEmptyProfile() => {
-        'name': '',
-        'age': 0,
-        'gender': '',
-        'state': '',
-        'district': '',
-        'caste': '',
-        'occupation': '',
-        'annual_income': 0,
-        'land_holding': 0,
-        'is_disabled': false,
-        'is_widow': false,
-        'has_bpl_card': false,
-        'has_aadhar': false,
-        'has_bank_account': false,
-        'family_size': 0,
-        'children_ages': <int>[],
-        'is_pregnant': false,
-        'education_level': '',
-        'confidence': 0.0,
-        'missing_info': ['Could not extract from input'],
-      };
+    'name': '',
+    'age': 0,
+    'gender': '',
+    'state': '',
+    'district': '',
+    'caste': '',
+    'occupation': '',
+    'annual_income': 0,
+    'land_holding': 0,
+    'is_disabled': false,
+    'is_widow': false,
+    'has_bpl_card': false,
+    'has_aadhar': false,
+    'has_bank_account': false,
+    'family_size': 0,
+    'children_ages': <int>[],
+    'is_pregnant': false,
+    'education_level': '',
+    'confidence': 0.0,
+    'missing_info': ['Could not extract from input'],
+  };
 }

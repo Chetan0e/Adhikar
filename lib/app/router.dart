@@ -53,10 +53,12 @@ class AppRouter {
         return _page(const AiChatScreen());
 
       case profile:
-        return _page(const ProfileReviewScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _page(ProfileReviewScreen(profileData: args));
 
       case schemes:
-        return _page(const SchemeListScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _page(SchemeListScreen(userProfile: args));
 
       case schemeDetail:
         final args = settings.arguments as Map<String, dynamic>?;

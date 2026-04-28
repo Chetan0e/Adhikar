@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../../../app/router.dart';
 import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../core/blocs/language/language_state.dart';
@@ -16,7 +17,12 @@ import '../../../../core/utils/eligibility_engine.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
 class SchemeListScreen extends StatefulWidget {
-  const SchemeListScreen({super.key});
+  final Map<String, dynamic>? userProfile;
+  
+  const SchemeListScreen({
+    this.userProfile,
+    super.key,
+  });
 
   @override
   State<SchemeListScreen> createState() => _SchemeListScreenState();
@@ -53,10 +59,39 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
 
   Future<void> _loadData() async {
     print('[SchemeList] _loadData called');
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args == null) {
-      // Called from HomeScreen tab — load all schemes from local database
-      print('[SchemeList] Loading from local database (no profile)');
+    print('[SchemeList] widget.userProfile: ${widget.userProfile}');
+    
+    // Load profile in priority order: constructor arg > route args > Hive cache
+    Map<String, dynamic>? profileData;
+    
+    // 1. Check constructor arg
+    if (widget.userProfile != null && widget.userProfile!.isNotEmpty) {
+      profileData = widget.userProfile;
+      print('[SchemeList] Using constructor arg profile');
+    } else {
+      // 2. Check route args
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is Map && args.isNotEmpty) {
+        profileData = Map<String, dynamic>.from(args);
+        print('[SchemeList] Using route args profile');
+      } else {
+        // 3. Check Hive cache
+        try {
+          final box = await Hive.openBox('user_profiles');
+          final cached = box.get('current_profile') as Map<String, dynamic>?;
+          if (cached != null && cached.isNotEmpty) {
+            profileData = cached;
+            print('[SchemeList] Using Hive cached profile');
+          }
+        } catch (e) {
+          print('[SchemeList] Error loading from Hive: $e');
+        }
+      }
+    }
+    
+    if (profileData == null || profileData.isEmpty) {
+      // No profile available — load all schemes from local database without eligibility
+      print('[SchemeList] No profile - loading all schemes from local database');
       setState(() => _isLoading = true);
       try {
         await _loadSchemes();
@@ -68,29 +103,53 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
       return;
     }
 
+    print('[SchemeList] Profile data: $profileData');
     setState(() => _isLoading = true);
 
-    final argMap = args as Map;
-    _profile = UserProfile.fromJson(Map<String, dynamic>.from(argMap));
+    _profile = UserProfile.fromJson(profileData);
+    List<Scheme> schemes = [];
 
-    // Load from Firestore
+    // Try Firestore first
     try {
       final schemesSnapshot = await _firestore
           .collection('schemes')
           .where('is_active', isEqualTo: true)
           .get();
       
-      final schemes = schemesSnapshot.docs.map((doc) {
+      schemes = schemesSnapshot.docs.map((doc) {
         final data = doc.data();
-        // Convert Firestore format to Scheme model format
         return Scheme.fromJson(data);
       }).toList();
+      
+      print('[SchemeList] Loaded ${schemes.length} schemes from Firestore');
+    } catch (e) {
+      print('[SchemeList] Error loading from Firestore: $e');
+    }
 
+    // Fallback to local database if Firestore empty or failed
+    if (schemes.isEmpty) {
+      print('[SchemeList] Falling back to local database');
+      final localSchemesData = SchemesDatabase.getAllSchemes();
+      schemes = localSchemesData.map((data) => Scheme.fromJson(data)).toList();
+      print('[SchemeList] Loaded ${schemes.length} schemes from local database');
+    }
+
+    // Match schemes against profile
+    if (schemes.isNotEmpty) {
+      print('[SchemeList] Matching ${schemes.length} schemes against profile');
+      print('[SchemeList] Profile: name=${_profile!.name}, occupation=${_profile!.occupation}, caste=${_profile!.caste}, income=${_profile!.annualIncome}, gender=${_profile!.gender}');
+      
       _matchedSchemes = _eligibilityEngine.matchSchemes(_profile!, schemes);
       _filteredSchemes = List.from(_matchedSchemes);
+      
+      print('[SchemeList] Matched ${_matchedSchemes.length} schemes for profile');
+      for (var i = 0; i < _matchedSchemes.length && i < 5; i++) {
+        final m = _matchedSchemes[i];
+        print('[SchemeList]  - ${m.scheme.name}: ${(m.confidence * 100).toStringAsFixed(0)}%');
+      }
 
-      // Speak results in selected language
-      if (mounted) {
+      // Speak results
+      if (mounted && _filteredSchemes.isNotEmpty) {
         final langCode = context.read<LanguageCubit>().currentLanguageCode;
         final count = _filteredSchemes.length;
         final totalBenefit = _filteredSchemes.fold<double>(
@@ -101,8 +160,7 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
         await _ttsService.init();
         await _ttsService.speak(msg, langCode);
       }
-    } catch (e) {
-      print('Error loading schemes from Firestore: $e');
+    } else {
       _matchedSchemes = [];
       _filteredSchemes = [];
     }
@@ -368,7 +426,10 @@ class _SchemeListScreenState extends State<SchemeListScreen> {
   }
 
   Widget _buildResultsSummary() {
-    if (_isLoading || _matchedSchemes.isEmpty) return const SizedBox.shrink();
+    // Only show eligibility summary if profile exists and has meaningful data
+    if (_isLoading || _matchedSchemes.isEmpty || _profile == null || _profile!.name.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final l10n = AppLocalizations.of(context);
 
     final total = _filteredSchemes.fold<double>(

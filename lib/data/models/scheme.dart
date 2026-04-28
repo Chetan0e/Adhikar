@@ -135,6 +135,7 @@ class EligibilityCriteria {
   final double? maxLandHolding;
   final String? specificCondition; // "must be widow" etc.
   final List<String>? statesApplicable;
+  final bool? isStudent; // For education schemes
 
   EligibilityCriteria({
     this.minAge,
@@ -149,22 +150,34 @@ class EligibilityCriteria {
     this.maxLandHolding,
     this.specificCondition,
     this.statesApplicable,
+    this.isStudent,
   });
 
   factory EligibilityCriteria.fromJson(Map<String, dynamic> json) {
+    // Handle both singular and plural field names from database
+    List<String>? parseStringList(dynamic value) {
+      if (value == null) return null;
+      if (value is List) return List<String>.from(value);
+      if (value is String) return [value];
+      return null;
+    }
+
     return EligibilityCriteria(
-      minAge: json['min_age'],
-      maxAge: json['max_age'],
-      genders: json['genders'] != null ? List<String>.from(json['genders']) : null,
-      castes: json['castes'] != null ? List<String>.from(json['castes']) : null,
-      maxIncome: json['max_income']?.toDouble(),
-      occupations: json['occupations'] != null ? List<String>.from(json['occupations']) : null,
-      requiresBPL: json['requires_bpl'],
-      requiresAadhar: json['requires_aadhar'],
-      requiresBankAccount: json['requires_bank_account'],
-      maxLandHolding: json['max_land_holding']?.toDouble(),
-      specificCondition: json['specific_condition'],
-      statesApplicable: json['states_applicable'] != null ? List<String>.from(json['states_applicable']) : null,
+      minAge: json['min_age'] ?? json['minAge'],
+      maxAge: json['max_age'] ?? json['maxAge'],
+      genders: parseStringList(json['genders'] ?? json['gender']),
+      // Handle both 'caste' (singular) and 'castes' (plural)
+      castes: parseStringList(json['castes'] ?? json['caste']),
+      maxIncome: (json['max_income'] ?? json['maxIncome'])?.toDouble(),
+      // Handle both 'occupations' (plural) and 'occupation' (singular)
+      occupations: parseStringList(json['occupations'] ?? json['occupation']),
+      requiresBPL: json['requires_bpl'] ?? json['requiresBPL'],
+      requiresAadhar: json['requires_aadhar'] ?? json['requiresAadhar'],
+      requiresBankAccount: json['requires_bank_account'] ?? json['requiresBankAccount'],
+      maxLandHolding: (json['max_land_holding'] ?? json['maxLandHolding'])?.toDouble(),
+      specificCondition: json['specific_condition'] ?? json['specificCondition'],
+      statesApplicable: parseStringList(json['states_applicable'] ?? json['statesApplicable']),
+      isStudent: json['is_student'] ?? json['isStudent'],
     );
   }
 
@@ -182,6 +195,7 @@ class EligibilityCriteria {
       'max_land_holding': maxLandHolding,
       'specific_condition': specificCondition,
       'states_applicable': statesApplicable,
+      'is_student': isStudent,
     };
   }
 }

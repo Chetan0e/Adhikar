@@ -587,7 +587,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get documentsReadyTitle => 'Documents Ready';
 
   @override
-  String get of => 'of';
+  String get ofWord => 'of';
 
   @override
   String get applyNowButton => 'Apply Now ✓';

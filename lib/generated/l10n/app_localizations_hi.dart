@@ -585,7 +585,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get documentsReadyTitle => 'दस्तावेज तैयार';
 
   @override
-  String get of => 'में से';
+  String get ofWord => 'में से';
 
   @override
   String get applyNowButton => 'अभी आवेदन करें ✓';

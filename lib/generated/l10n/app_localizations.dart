@@ -1214,11 +1214,11 @@ abstract class AppLocalizations {
   /// **'Documents Ready'**
   String get documentsReadyTitle;
 
-  /// No description provided for @of.
+  /// No description provided for @ofWord.
   ///
   /// In en, this message translates to:
   /// **'of'**
-  String get of;
+  String get ofWord;
 
   /// No description provided for @applyNowButton.
   ///

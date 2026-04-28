@@ -8,7 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/scheme_categories.dart';
 import '../../../../core/blocs/language/language_cubit.dart';
 import '../../../../data/models/scheme.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class SchemeDetailScreen extends StatelessWidget {
   final Map<String, dynamic>? schemeData;
